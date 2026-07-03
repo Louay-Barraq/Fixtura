@@ -12,6 +12,7 @@ class TournamentProvider extends ChangeNotifier {
   Tournament? _activeTournament;
   List<Team> _activeTeams = [];
   List<MatchModel> _activeMatches = [];
+  Map<int, Map<int, String>> _activeRouletteAssignments = {};
   bool _isLoading = false;
 
   List<Tournament> get tournaments => _tournaments;
@@ -45,6 +46,9 @@ class TournamentProvider extends ChangeNotifier {
       if (_activeTournament != null) {
         _activeTeams = await _dbHelper.getTeamsForTournament(id);
         _activeMatches = await _dbHelper.getMatchesForTournament(id);
+        _activeRouletteAssignments = await _loadRouletteAssignments(id);
+      } else {
+        _activeRouletteAssignments = {};
       }
     } catch (e) {
       debugPrint("Error loading tournament details: $e");
@@ -63,6 +67,10 @@ class TournamentProvider extends ChangeNotifier {
     int pointsWin = 3,
     int pointsDraw = 1,
     int pointsLoss = 0,
+    bool useRoulette = false,
+    List<String> roulettePool = const [],
+    bool rouletteUnique = true,
+    bool rouletteRoundUnique = true,
   }) async {
     _isLoading = true;
     notifyListeners();
@@ -81,6 +89,10 @@ class TournamentProvider extends ChangeNotifier {
           pointsForDraw: pointsDraw,
           pointsForLoss: pointsLoss,
           createdAt: DateTime.now(),
+          useRoulette: useRoulette,
+          roulettePool: roulettePool,
+          rouletteUnique: rouletteUnique,
+          rouletteRoundUnique: rouletteRoundUnique,
         );
         tournamentId = await _dbHelper.insertTournament(tournament, txn);
 
@@ -117,6 +129,258 @@ class TournamentProvider extends ChangeNotifier {
     } catch (e) {
       debugPrint("Error creating tournament: $e");
       return null;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<Map<int, Map<int, String>>> _loadRouletteAssignments(int tournamentId) async {
+    final rows = await _dbHelper.getRouletteAssignmentsForTournament(tournamentId);
+    final assignments = <int, Map<int, String>>{};
+
+    for (final row in rows) {
+      final teamId = row['team_id'] as int;
+      final roundNumber = row['round_number'] as int;
+      final assignedTeam = row['assigned_team'] as String;
+      assignments.putIfAbsent(teamId, () => {})[roundNumber] = assignedTeam;
+    }
+
+    return assignments;
+  }
+
+  String? getRouletteAssignmentForTeamRound(int teamId, int roundNumber) {
+    return _activeRouletteAssignments[teamId]?[roundNumber];
+  }
+
+  List<String> getAvailableRouletteTeamsForPlayer(Team team, int roundNumber) {
+    return _getAvailableRouletteTeamsForPlayer(
+      team: team,
+      roundNumber: roundNumber,
+      assignmentsByTeam: _activeRouletteAssignments,
+    );
+  }
+
+  List<String> _getAvailableRouletteTeamsForPlayer({
+    required Team team,
+    required int roundNumber,
+    required Map<int, Map<int, String>> assignmentsByTeam,
+  }) {
+    final tournament = _activeTournament;
+    if (tournament == null) return const [];
+
+    final usedTeams = <String>{};
+    if (tournament.rouletteRoundUnique) {
+      final assignmentsForTeam = assignmentsByTeam[team.id] ?? const {};
+      for (final entry in assignmentsForTeam.entries) {
+        if (entry.key != roundNumber) {
+          usedTeams.add(entry.value);
+        }
+      }
+    }
+
+    return tournament.roulettePool.where((option) => !usedTeams.contains(option)).toList();
+  }
+
+  List<int> getRouletteRounds() {
+    final rounds = _activeMatches.map((match) => match.roundNumber).toSet().toList();
+    rounds.sort();
+    return rounds;
+  }
+
+  bool hasRouletteAssignmentsForRound(int roundNumber) {
+    return _activeRouletteAssignments.values.any((roundAssignments) => roundAssignments.containsKey(roundNumber));
+  }
+
+  Future<void> setRouletteAssignment(int teamId, int roundNumber, String teamName) async {
+    if (_activeTournament == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        await _dbHelper.upsertRouletteAssignment(
+          tournamentId: _activeTournament!.id!,
+          teamId: teamId,
+          roundNumber: roundNumber,
+          assignedTeam: teamName,
+          executor: txn,
+        );
+      });
+      
+      // Reload state
+      if (_activeTournament?.id != null) {
+        await loadTournamentDetails(_activeTournament!.id!);
+      }
+    } catch (e) {
+      debugPrint("Error assigning roulette team: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetRouletteRound(int roundNumber) async {
+    if (_activeTournament == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        await _dbHelper.deleteRouletteAssignments(
+          tournamentId: _activeTournament!.id!,
+          roundNumber: roundNumber,
+          executor: txn,
+        );
+      });
+      
+      // Reload state
+      if (_activeTournament?.id != null) {
+        await loadTournamentDetails(_activeTournament!.id!);
+      }
+    } catch (e) {
+      debugPrint("Error resetting roulette: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> resetRouletteAllRounds() async {
+    if (_activeTournament == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        await _dbHelper.deleteRouletteAssignments(
+          tournamentId: _activeTournament!.id!,
+          executor: txn,
+        );
+      });
+
+      if (_activeTournament?.id != null) {
+        await loadTournamentDetails(_activeTournament!.id!);
+      }
+    } catch (e) {
+      debugPrint("Error resetting all roulette rounds: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> autoDraftRound(int roundNumber) async {
+    if (_activeTournament == null) return;
+
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        final random = Random();
+        final workingAssignments = <int, Map<int, String>>{};
+
+        for (final entry in _activeRouletteAssignments.entries) {
+          workingAssignments[entry.key] = Map<int, String>.from(entry.value);
+        }
+
+        for (final team in _activeTeams) {
+          final availableTeams = _getAvailableRouletteTeamsForPlayer(
+            team: team,
+            roundNumber: roundNumber,
+            assignmentsByTeam: workingAssignments,
+          );
+
+          if (availableTeams.isEmpty) {
+            if (_activeTournament!.rouletteRoundUnique) {
+              throw StateError('Not enough roulette teams to draft round $roundNumber for ${team.name}.');
+            }
+            continue;
+          }
+
+          final selectedTeam = availableTeams[random.nextInt(availableTeams.length)];
+          await _dbHelper.upsertRouletteAssignment(
+            tournamentId: _activeTournament!.id!,
+            teamId: team.id!,
+            roundNumber: roundNumber,
+            assignedTeam: selectedTeam,
+            executor: txn,
+          );
+
+          workingAssignments.putIfAbsent(team.id!, () => {})[roundNumber] = selectedTeam;
+        }
+      });
+
+      if (_activeTournament?.id != null) {
+        await loadTournamentDetails(_activeTournament!.id!);
+      }
+    } catch (e) {
+      debugPrint("Error auto drafting round $roundNumber: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  Future<void> autoDraftAllRounds() async {
+    if (_activeTournament == null) return;
+    
+    _isLoading = true;
+    notifyListeners();
+    
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        final random = Random();
+        final rounds = getRouletteRounds();
+        final workingAssignments = <int, Map<int, String>>{};
+
+        for (final entry in _activeRouletteAssignments.entries) {
+          workingAssignments[entry.key] = Map<int, String>.from(entry.value);
+        }
+
+        for (final roundNumber in rounds) {
+          for (final team in _activeTeams) {
+            final availableTeams = _getAvailableRouletteTeamsForPlayer(
+              team: team,
+              roundNumber: roundNumber,
+              assignmentsByTeam: workingAssignments,
+            );
+            if (availableTeams.isEmpty) {
+              if (_activeTournament!.rouletteRoundUnique) {
+                throw StateError('Not enough roulette teams to draft round $roundNumber for ${team.name}.');
+              }
+              continue;
+            }
+
+            final selectedTeam = availableTeams[random.nextInt(availableTeams.length)];
+            await _dbHelper.upsertRouletteAssignment(
+              tournamentId: _activeTournament!.id!,
+              teamId: team.id!,
+              roundNumber: roundNumber,
+              assignedTeam: selectedTeam,
+              executor: txn,
+            );
+
+            workingAssignments.putIfAbsent(team.id!, () => {})[roundNumber] = selectedTeam;
+          }
+        }
+      });
+      
+      // Reload state
+      if (_activeTournament?.id != null) {
+        await loadTournamentDetails(_activeTournament!.id!);
+      }
+    } catch (e) {
+      debugPrint("Error in auto draft: $e");
     } finally {
       _isLoading = false;
       notifyListeners();
