@@ -10,6 +10,8 @@ class MatchCard extends StatelessWidget {
   final Team? homeTeam;
   final Team? awayTeam;
   final TournamentType tournamentType;
+  final int? roundNumber;
+  final String? Function(Team? team, int? roundNumber)? assignedTeamResolver;
 
   const MatchCard({
     super.key,
@@ -17,6 +19,8 @@ class MatchCard extends StatelessWidget {
     required this.homeTeam,
     required this.awayTeam,
     required this.tournamentType,
+    this.roundNumber,
+    this.assignedTeamResolver,
   });
 
   Color _parseColor(String? hexString) {
@@ -31,10 +35,16 @@ class MatchCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final isByeMatch = match.homeTeamId == null || match.awayTeamId == null;
     final isPlayed = match.isPlayed;
+    final homeAssignedTeam = assignedTeamResolver?.call(homeTeam, roundNumber) ?? homeTeam?.assignedTeam;
+    final awayAssignedTeam = assignedTeamResolver?.call(awayTeam, roundNumber) ?? awayTeam?.assignedTeam;
 
     // Resolve displayed names
-    final homeName = homeTeam?.name ?? (match.homeTeamId == null && isByeMatch ? 'BYE' : 'TBD');
-    final awayName = awayTeam?.name ?? (match.awayTeamId == null && isByeMatch ? 'BYE' : 'TBD');
+    final homeName = homeTeam != null 
+      ? (homeAssignedTeam != null ? '${homeTeam!.name} ($homeAssignedTeam)' : homeTeam!.name)
+        : (match.homeTeamId == null && isByeMatch ? 'BYE' : 'TBD');
+    final awayName = awayTeam != null
+      ? (awayAssignedTeam != null ? '${awayTeam!.name} ($awayAssignedTeam)' : awayTeam!.name)
+        : (match.awayTeamId == null && isByeMatch ? 'BYE' : 'TBD');
 
     final homeColor = homeTeam != null ? _parseColor(homeTeam!.colorHex) : AppTheme.divider;
     final awayColor = awayTeam != null ? _parseColor(awayTeam!.colorHex) : AppTheme.divider;
@@ -97,16 +107,31 @@ class MatchCard extends StatelessWidget {
                       mainAxisAlignment: MainAxisAlignment.end,
                       children: [
                         Expanded(
-                          child: Text(
-                            homeName,
-                            textAlign: TextAlign.end,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: homeTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            children: [
+                              Text(
+                                homeTeam!.name,
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: homeTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              Text(
+                                "$homeAssignedTeam",
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: homeTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                         const SizedBox(width: 10),
@@ -185,15 +210,31 @@ class MatchCard extends StatelessWidget {
                         ),
                         const SizedBox(width: 10),
                         Expanded(
-                          child: Text(
-                            awayName,
-                            style: TextStyle(
-                              fontSize: 15,
-                              fontWeight: FontWeight.bold,
-                              color: awayTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
-                            ),
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
+                          child: Column(
+                            children: [
+                              Text(
+                                awayTeam!.name,
+                                style: TextStyle(
+                                  fontSize: 15,
+                                  fontWeight: FontWeight.bold,
+                                  color: awayTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                              
+                              Text(
+                                "$awayAssignedTeam",
+                                textAlign: TextAlign.end,
+                                style: TextStyle(
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  color: awayTeam == null ? AppTheme.textSecondary : AppTheme.textPrimary,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+                            ],
                           ),
                         ),
                       ],
