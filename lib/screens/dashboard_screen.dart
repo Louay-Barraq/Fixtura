@@ -6,6 +6,8 @@ import '../models/tournament.dart';
 import '../theme/app_theme.dart';
 import 'create_tournament_screen.dart';
 import 'tournament_details_screen.dart';
+import 'standalone_roulette_screen.dart';
+
 
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
@@ -15,6 +17,8 @@ class DashboardScreen extends StatefulWidget {
 }
 
 class _DashboardScreenState extends State<DashboardScreen> {
+  bool _isMenuOpen = false;
+
   @override
   void initState() {
     super.initState();
@@ -157,7 +161,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                             ),
                             const SizedBox(height: 8),
                             const Text(
-                              'Kick off your first EA FC league or knockout brackets with your friends right now!',
+                              'Kick off your first league or knockout brackets with your friends right now!',
                               textAlign: TextAlign.center,
                               style: TextStyle(color: AppTheme.textSecondary, fontSize: 14),
                             ),
@@ -191,18 +195,55 @@ class _DashboardScreenState extends State<DashboardScreen> {
           },
         ),
       ),
-      floatingActionButton: Consumer<TournamentProvider>(
-        builder: (context, provider, child) {
-          if (provider.tournaments.isEmpty) return const SizedBox.shrink();
-          return FloatingActionButton.extended(
-            onPressed: () => _navigateToCreateScreen(context),
+      floatingActionButton: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.end,
+        children: [
+          if (_isMenuOpen) ...[
+            // Button 1: Standalone Roulette
+            FloatingActionButton.extended(
+              heroTag: 'menu_roulette',
+              onPressed: () {
+                setState(() => _isMenuOpen = false);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const StandaloneRouletteScreen()),
+                );
+              },
+              backgroundColor: AppTheme.surface,
+              icon: const Icon(Icons.circle_outlined, color: AppTheme.primary),
+              label: const Text('ROULETTE DRAFT', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 12),
+            // Button 2: New Tournament
+            FloatingActionButton.extended(
+              heroTag: 'menu_tournament',
+              onPressed: () {
+                setState(() => _isMenuOpen = false);
+                _navigateToCreateScreen(context);
+              },
+              backgroundColor: AppTheme.surface,
+              icon: const Icon(Icons.emoji_events, color: AppTheme.primary),
+              label: const Text('NEW TOURNAMENT', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+            ),
+            const SizedBox(height: 12),
+          ],
+          // Main Toggle Button
+          FloatingActionButton(
+            heroTag: 'menu_toggle',
+            onPressed: () {
+              setState(() {
+                _isMenuOpen = !_isMenuOpen;
+              });
+            },
             backgroundColor: Colors.transparent,
             elevation: 0,
-            label: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+            child: Container(
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 gradient: AppTheme.primaryGradient,
-                borderRadius: BorderRadius.circular(30),
+                shape: BoxShape.circle,
                 boxShadow: [
                   BoxShadow(
                     color: AppTheme.primary.withOpacity(0.4),
@@ -211,19 +252,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
                   )
                 ],
               ),
-              child: const Row(
-                children: [
-                  Icon(Icons.add, color: AppTheme.background),
-                  SizedBox(width: 8),
-                  Text(
-                    'NEW TOURNAMENT',
-                    style: TextStyle(color: AppTheme.background, fontWeight: FontWeight.bold, letterSpacing: 0.5),
-                  ),
-                ],
+              child: Icon(
+                _isMenuOpen ? Icons.close : Icons.menu,
+                color: AppTheme.background,
               ),
             ),
-          );
-        },
+          ),
+        ],
       ),
     );
   }

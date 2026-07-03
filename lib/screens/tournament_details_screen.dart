@@ -8,6 +8,7 @@ import '../providers/tournament_provider.dart';
 import '../theme/app_theme.dart';
 import '../widgets/match_card.dart';
 import '../widgets/visual_bracket.dart';
+import '../widgets/roulette_wheel.dart';
 import '../database/database_helper.dart';
 
 class TournamentDetailsScreen extends StatefulWidget {
@@ -19,10 +20,13 @@ class TournamentDetailsScreen extends StatefulWidget {
   State<TournamentDetailsScreen> createState() => _TournamentDetailsScreenState();
 }
 
-class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with SingleTickerProviderStateMixin {
+class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with TickerProviderStateMixin {
   TabController? _tabController;
   int _selectedRound = 1;
+  int _selectedRouletteRound = -1;
   bool _initializedRound = false;
+  int? _selectedPlayerId;
+  bool _isRouletteMenuOpen = false;
 
   @override
   void initState() {
@@ -73,9 +77,12 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
 
         final isRoundRobin = tournament.type == TournamentType.roundRobin;
         
-        // Initialize TabController based on tournament type
-        if (_tabController == null) {
-          _tabController = TabController(length: 2, vsync: this);
+        final showRouletteTab = tournament.useRoulette;
+        final tabCount = showRouletteTab ? 3 : 2;
+        // Initialize TabController based on tournament type and roulette toggle
+        if (_tabController == null || _tabController!.length != tabCount) {
+          _tabController?.dispose();
+          _tabController = TabController(length: tabCount, vsync: this);
         }
 
         // Initialize smart round selector (focus on first round with unplayed matches)
@@ -96,68 +103,177 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
           _initializedRound = true;
         }
 
+        final rouletteRounds = provider.getRouletteRounds();
+        if (showRouletteTab && rouletteRounds.isNotEmpty) {
+          if (_selectedRouletteRound == -1 || !rouletteRounds.contains(_selectedRouletteRound)) {
+            _selectedRouletteRound = rouletteRounds.first;
+            _selectedPlayerId = null;
+          }
+        }
+
         final allPlayed = matches.isNotEmpty && matches.every((m) => m.isPlayed);
         final isCompleted = tournament.status == 'completed';
 
-        return Scaffold(
-          appBar: AppBar(
-            title: Text(tournament.name),
-            leading: IconButton(
-              icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
-              onPressed: () {
-                // Refresh list on return
-                provider.loadAllTournaments();
-                Navigator.pop(context);
-              },
-            ),
-            actions: [
-              if (allPlayed && !isCompleted)
-                IconButton(
-                  icon: const Icon(Icons.stars, color: AppTheme.primary),
-                  tooltip: 'Complete Tournament',
-                  onPressed: () => _completeTournament(context, tournament, provider),
-                ),
-            ],
-            bottom: TabBar(
-              controller: _tabController,
-              indicatorColor: AppTheme.primary,
-              labelColor: AppTheme.primary,
-              unselectedLabelColor: AppTheme.textSecondary,
-              tabs: isRoundRobin
-                  ? const [
-                      Tab(icon: Icon(Icons.sports_soccer), text: 'Fixtures'),
-                      Tab(icon: Icon(Icons.format_list_numbered), text: 'Standings'),
-                    ]
-                  : const [
-                      Tab(icon: Icon(Icons.sports_soccer), text: 'Fixtures List'),
-                      Tab(icon: Icon(Icons.emoji_events), text: 'Bracket Board'),
-                    ],
-            ),
-          ),
-          body: Column(
-            children: [
-              // Winner celebration card if completed
-              if (isCompleted) _buildWinnerCard(context, tournament, teams, matches),
-
-              Expanded(
-                child: TabBarView(
-                  controller: _tabController,
-                  children: isRoundRobin
-                      ? [
-                          // Tab 1: Standings
-                          _buildStandingsTab(provider),
-                          // Tab 2: Fixtures
-                          _buildFixturesTab(tournament, teams, matches),
-                        ]
-                      : [
-                          // Tab 1: Bracket Board
-                          VisualBracket(tournament: tournament, teams: teams, matches: matches),
-                          // Tab 2: Fixtures List
-                          _buildFixturesTab(tournament, teams, matches),
-                        ],
-                ),
+        return SafeArea(
+          child: Scaffold(
+            appBar: AppBar(
+              title: Text(tournament.name),
+              leading: IconButton(
+                icon: const Icon(Icons.arrow_back, color: AppTheme.textPrimary),
+                onPressed: () {
+                  provider.loadAllTournaments();
+                  Navigator.pop(context);
+                },
               ),
-            ],
+              actions: [
+                if (allPlayed && !isCompleted)
+                  IconButton(
+                    icon: const Icon(Icons.stars, color: AppTheme.primary),
+                    tooltip: 'Complete Tournament',
+                    onPressed: () => _completeTournament(context, tournament, provider),
+                  ),
+              ],
+              bottom: TabBar(
+                controller: _tabController,
+                indicatorColor: AppTheme.primary,
+                labelColor: AppTheme.primary,
+                unselectedLabelColor: AppTheme.textSecondary,
+                tabs: [
+                  if (isRoundRobin) ...const [
+                    Tab(icon: Icon(Icons.sports_soccer), text: 'Fixtures'),
+                    Tab(icon: Icon(Icons.format_list_numbered), text: 'Standings'),
+                  ] else ...const [
+                    Tab(icon: Icon(Icons.emoji_events), text: 'Bracket Board'),
+                    Tab(icon: Icon(Icons.sports_soccer), text: 'Fixtures List'),
+                  ],
+                  if (showRouletteTab)
+                    const Tab(icon: Icon(Icons.circle_outlined), text: 'Roulette Draft'),
+                ],
+              ),
+            ),
+            body: Column(
+              children: [
+                if (isCompleted) _buildWinnerCard(context, tournament, teams, matches),
+                Expanded(
+                  child: TabBarView(
+                    controller: _tabController,
+                    physics: const NeverScrollableScrollPhysics(),
+                    children: [
+                      if (isRoundRobin) ...[
+                        _buildFixturesTab(tournament, teams, matches, provider),
+                        _buildStandingsTab(provider),
+                      ] else ...[
+                        VisualBracket(
+                          tournament: tournament,
+                          teams: teams,
+                          matches: matches,
+                          assignedTeamResolver: (team, roundNumber) {
+                            if (team == null || team.id == null || roundNumber == null) return null;
+                            return provider.getRouletteAssignmentForTeamRound(team.id!, roundNumber);
+                          },
+                        ),
+                        _buildFixturesTab(tournament, teams, matches, provider),
+                      ],
+                      if (showRouletteTab)
+                        _buildRouletteTab(provider, tournament, teams),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+            floatingActionButton: showRouletteTab
+                ? Column(
+                    mainAxisSize: MainAxisSize.min,
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      if (_isRouletteMenuOpen) ...[
+                        FloatingActionButton.extended(
+                          heroTag: 'roulette_reset_all',
+                          onPressed: rouletteRounds.isEmpty
+                              ? null
+                              : () {
+                                  setState(() => _isRouletteMenuOpen = false);
+                                  provider.resetRouletteAllRounds();
+                                },
+                          backgroundColor: AppTheme.surface,
+                          icon: const Icon(Icons.restart_alt, color: AppTheme.accent),
+                          label: const Text('RESET ALL ROUNDS', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 12),
+                        FloatingActionButton.extended(
+                          heroTag: 'roulette_reset_round',
+                          onPressed: rouletteRounds.isEmpty
+                              ? null
+                              : () {
+                                  setState(() => _isRouletteMenuOpen = false);
+                                  provider.resetRouletteRound(_selectedRouletteRound);
+                                },
+                          backgroundColor: AppTheme.surface,
+                          icon: const Icon(Icons.refresh, color: AppTheme.accent),
+                          label: const Text('RESET THIS ROUND', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 12),
+                        FloatingActionButton.extended(
+                          heroTag: 'roulette_auto_all',
+                          onPressed: rouletteRounds.isEmpty
+                              ? null
+                              : () {
+                                  setState(() => _isRouletteMenuOpen = false);
+                                  provider.autoDraftAllRounds();
+                                },
+                          backgroundColor: AppTheme.surface,
+                          icon: const Icon(Icons.auto_fix_high, color: AppTheme.primary),
+                          label: const Text('AUTO DRAFT ALL ROUNDS', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 12),
+                        FloatingActionButton.extended(
+                          heroTag: 'roulette_auto_round',
+                          onPressed: rouletteRounds.isEmpty
+                              ? null
+                              : () {
+                                  setState(() => _isRouletteMenuOpen = false);
+                                  provider.autoDraftRound(_selectedRouletteRound);
+                                },
+                          backgroundColor: AppTheme.surface,
+                          icon: const Icon(Icons.auto_awesome, color: AppTheme.primary),
+                          label: const Text('AUTO DRAFT THIS ROUND', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold)),
+                        ),
+                        const SizedBox(height: 12),
+                      ],
+                      FloatingActionButton(
+                        heroTag: 'roulette_menu_toggle',
+                        onPressed: rouletteRounds.isEmpty
+                            ? null
+                            : () {
+                                setState(() {
+                                  _isRouletteMenuOpen = !_isRouletteMenuOpen;
+                                });
+                              },
+                        backgroundColor: Colors.transparent,
+                        elevation: 0,
+                        child: Container(
+                          width: 56,
+                          height: 56,
+                          decoration: BoxDecoration(
+                            gradient: AppTheme.primaryGradient,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                color: AppTheme.primary.withOpacity(0.4),
+                                blurRadius: 15,
+                                offset: const Offset(0, 5),
+                              )
+                            ],
+                          ),
+                          child: Icon(
+                            _isRouletteMenuOpen ? Icons.close : Icons.menu,
+                            color: AppTheme.background,
+                          ),
+                        ),
+                      ),
+                    ],
+                  )
+                : null,
           ),
         );
       },
@@ -256,7 +372,9 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
                             const SizedBox(width: 8),
                             Expanded(
                               child: Text(
-                                standing.team.name,
+                                standing.team.assignedTeam != null
+                                    ? '${standing.team.name} (${standing.team.assignedTeam})'
+                                    : standing.team.name,
                                 style: TextStyle(
                                   fontWeight: isLeader ? FontWeight.bold : FontWeight.w600,
                                   color: isLeader ? AppTheme.textPrimary : AppTheme.textPrimary,
@@ -321,6 +439,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
     Tournament tournament,
     List<Team> teams,
     List<MatchModel> matches,
+    TournamentProvider provider,
   ) {
     if (matches.isEmpty) {
       return const Center(
@@ -401,6 +520,11 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
                       homeTeam: homeTeam.id == -1 ? null : homeTeam,
                       awayTeam: awayTeam.id == -1 ? null : awayTeam,
                       tournamentType: tournament.type,
+                      roundNumber: match.roundNumber,
+                      assignedTeamResolver: (team, roundNumber) {
+                        if (team == null || team.id == null || roundNumber == null) return null;
+                        return provider.getRouletteAssignmentForTeamRound(team.id!, roundNumber);
+                      },
                     );
                   },
                 ),
@@ -537,6 +661,297 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> with 
                   const SnackBar(content: Text('Championship finished! Champion has been crowned.'), backgroundColor: AppTheme.primary),
                 );
               }
+            },
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRouletteTab(TournamentProvider provider, Tournament tournament, List<Team> teams) {
+    final rounds = provider.getRouletteRounds();
+
+    if (rounds.isNotEmpty && (_selectedRouletteRound == -1 || !rounds.contains(_selectedRouletteRound))) {
+      _selectedRouletteRound = rounds.first;
+    }
+
+    if (_selectedPlayerId == null && teams.isNotEmpty) {
+      _selectedPlayerId = teams.first.id;
+    } else if (_selectedPlayerId != null && !teams.any((team) => team.id == _selectedPlayerId) && teams.isNotEmpty) {
+      _selectedPlayerId = teams.first.id;
+    }
+
+    final selectedPlayer = teams.firstWhere(
+      (t) => t.id == _selectedPlayerId,
+      orElse: () => teams.isNotEmpty ? teams.first : Team(id: -1, tournamentId: -1, name: 'TBD'),
+    );
+
+    final availableTeams = selectedPlayer.id == -1
+        ? <String>[]
+        : provider.getAvailableRouletteTeamsForPlayer(selectedPlayer, _selectedRouletteRound);
+
+    final selectedAssignment = selectedPlayer.id == -1
+        ? null
+        : provider.getRouletteAssignmentForTeamRound(selectedPlayer.id!, _selectedRouletteRound);
+
+    return SingleChildScrollView(
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        children: [
+          // Round selector
+          if (rounds.isNotEmpty) ...[
+            SizedBox(
+              height: 74,
+              child: ListView.separated(
+                scrollDirection: Axis.horizontal,
+                itemCount: rounds.length,
+                separatorBuilder: (context, index) => const SizedBox(width: 10),
+                itemBuilder: (context, index) {
+                  final roundNumber = rounds[index];
+                  final isSelected = _selectedRouletteRound == roundNumber;
+
+                  return InkWell(
+                    onTap: () {
+                      setState(() {
+                        _selectedRouletteRound = roundNumber;
+                        _selectedPlayerId = teams.isNotEmpty ? teams.first.id : null;
+                      });
+                    },
+                    borderRadius: BorderRadius.circular(14),
+                    child: Container(
+                      width: 120,
+                      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+                      decoration: BoxDecoration(
+                        color: isSelected ? AppTheme.primary.withOpacity(0.12) : AppTheme.surface,
+                        borderRadius: BorderRadius.circular(14),
+                        border: Border.all(color: isSelected ? AppTheme.primary : AppTheme.divider),
+                      ),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            'Round $roundNumber',
+                            style: TextStyle(
+                              color: isSelected ? AppTheme.primary : AppTheme.textPrimary,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 13,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            selectedAssignment != null && isSelected ? selectedAssignment : 'Tap to draft',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isSelected ? AppTheme.textSecondary : AppTheme.textSecondary,
+                              fontSize: 11,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                },
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+
+          // Header info & Reset Button
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text(
+                'ROUND ROULETTE',
+                style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 13, letterSpacing: 1),
+              ),
+              const SizedBox.shrink(),
+            ],
+          ),
+          const SizedBox(height: 12),
+
+          // Main Layout: Split list and wheel
+          Container(
+            padding: const EdgeInsets.all(16),
+            width: double.infinity,
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: AppTheme.divider.withOpacity(0.5)),
+            ),
+            child: Column(
+              children: [
+                if (rounds.isEmpty) ...[
+                  const Column(
+                    children: [
+                      Icon(Icons.schedule_outlined, color: AppTheme.textSecondary, size: 48),
+                      SizedBox(height: 12),
+                      Text('No rounds available', style: TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold, fontSize: 16)),
+                      SizedBox(height: 6),
+                      Text('Roulette rounds will appear after fixtures are generated.', style: TextStyle(color: AppTheme.textSecondary, fontSize: 13)),
+                    ],
+                  ),
+                ] else ...[
+                  // Player selector for the selected round
+                  DropdownButtonFormField<int>(
+                    value: _selectedPlayerId,
+                    dropdownColor: AppTheme.surface,
+                    style: const TextStyle(color: AppTheme.textPrimary),
+                    decoration: InputDecoration(
+                      labelText: 'Select Player for Round $_selectedRouletteRound',
+                      labelStyle: const TextStyle(color: AppTheme.textSecondary),
+                      enabledBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppTheme.divider),
+                      ),
+                      focusedBorder: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12),
+                        borderSide: const BorderSide(color: AppTheme.primary),
+                      ),
+                      filled: true,
+                      fillColor: AppTheme.surfaceLight,
+                    ),
+                    items: teams.map((t) {
+                      return DropdownMenuItem<int>(
+                        value: t.id,
+                        child: Text(t.name),
+                      );
+                    }).toList(),
+                    onChanged: (val) {
+                      setState(() {
+                        _selectedPlayerId = val;
+                      });
+                    },
+                  ),
+                  const SizedBox(height: 24),
+
+                  // Roulette Wheel
+                  RouletteWheel(
+                    options: availableTeams,
+                    size: 260,
+                    onResult: (winner) {
+                      provider.setRouletteAssignment(selectedPlayer.id!, _selectedRouletteRound, winner);
+                      
+                      // Show assignment modal
+                      showDialog(
+                        context: context,
+                        builder: (context) => AlertDialog(
+                          backgroundColor: AppTheme.surface,
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(20),
+                            side: const BorderSide(color: AppTheme.primary, width: 2),
+                          ),
+                          content: Column(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              const Icon(Icons.stars, color: AppTheme.primary, size: 64),
+                              const SizedBox(height: 16),
+                              const Text(
+                                'ROULETTE RESULT',
+                                style: TextStyle(
+                                  color: AppTheme.textSecondary,
+                                  fontSize: 12,
+                                  fontWeight: FontWeight.bold,
+                                  letterSpacing: 1.5,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              ShaderMask(
+                                shaderCallback: (bounds) => AppTheme.primaryGradient.createShader(bounds),
+                                child: Text(
+                                  winner.toUpperCase(),
+                                  textAlign: TextAlign.center,
+                                  style: const TextStyle(
+                                    color: Colors.white,
+                                    fontSize: 28,
+                                    fontWeight: FontWeight.w900,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Text(
+                                '${selectedPlayer.name} • Round $_selectedRouletteRound',
+                                textAlign: TextAlign.center,
+                                style: const TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                              ),
+                              const SizedBox(height: 24),
+                              ElevatedButton(
+                                onPressed: () => Navigator.pop(context),
+                                style: ElevatedButton.styleFrom(
+                                  backgroundColor: AppTheme.primary,
+                                  foregroundColor: AppTheme.background,
+                                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                                  padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                                ),
+                                child: const Text('AWESOME', style: TextStyle(fontWeight: FontWeight.bold)),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+                ],
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+
+          // Assignment Table
+          const Align(
+            alignment: Alignment.centerLeft,
+            child: Text(
+              'ROUND STATUS',
+              style: TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 1),
+            ),
+          ),
+          const SizedBox(height: 12),
+          ListView.builder(
+            shrinkWrap: true,
+            physics: const NeverScrollableScrollPhysics(),
+            itemCount: teams.length,
+            itemBuilder: (context, index) {
+              final team = teams[index];
+              final roundAssignment = provider.getRouletteAssignmentForTeamRound(team.id!, _selectedRouletteRound);
+              final isAssigned = roundAssignment != null;
+              
+              return Container(
+                margin: const EdgeInsets.only(bottom: 8),
+                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                decoration: BoxDecoration(
+                  color: AppTheme.surface,
+                  borderRadius: BorderRadius.circular(12),
+                  border: Border.all(
+                    color: isAssigned ? AppTheme.primary.withOpacity(0.3) : AppTheme.divider.withOpacity(0.5),
+                  ),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      team.name,
+                      style: const TextStyle(color: AppTheme.textPrimary, fontWeight: FontWeight.bold),
+                    ),
+                    if (isAssigned)
+                      Row(
+                        children: [
+                          const Icon(Icons.check, color: AppTheme.primary, size: 16),
+                          const SizedBox(width: 6),
+                          Text(
+                            roundAssignment,
+                            style: const TextStyle(color: AppTheme.primary, fontWeight: FontWeight.bold),
+                          ),
+                        ],
+                      )
+                    else
+                      const Text(
+                        'Pending Draft',
+                        style: TextStyle(color: AppTheme.textSecondary, fontSize: 12, fontStyle: FontStyle.italic),
+                      ),
+                  ],
+                ),
+              );
             },
           ),
         ],
