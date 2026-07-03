@@ -9,12 +9,14 @@ class VisualBracket extends StatelessWidget {
   final Tournament tournament;
   final List<Team> teams;
   final List<MatchModel> matches;
+  final String? Function(Team? team, int? roundNumber)? assignedTeamResolver;
 
   const VisualBracket({
     super.key,
     required this.tournament,
     required this.teams,
     required this.matches,
+    this.assignedTeamResolver,
   });
 
   @override
@@ -110,6 +112,8 @@ class VisualBracket extends StatelessWidget {
                             homeTeam: homeTeam.id == -1 ? null : homeTeam,
                             awayTeam: awayTeam.id == -1 ? null : awayTeam,
                             tournamentType: TournamentType.knockout,
+                            roundNumber: match.roundNumber,
+                            assignedTeamResolver: assignedTeamResolver,
                           ),
                         );
                       }).toList(),
