@@ -10,6 +10,10 @@ class Tournament {
   final int pointsForLoss;
   final DateTime createdAt;
   final String status; // 'active', 'completed'
+  final bool useRoulette;
+  final List<String> roulettePool;
+  final bool rouletteUnique;
+  final bool rouletteRoundUnique;
 
   Tournament({
     this.id,
@@ -21,6 +25,10 @@ class Tournament {
     this.pointsForLoss = 0,
     required this.createdAt,
     this.status = 'active',
+    this.useRoulette = false,
+    this.roulettePool = const [],
+    this.rouletteUnique = true,
+    this.rouletteRoundUnique = true,
   });
 
   Map<String, dynamic> toMap() {
@@ -34,10 +42,15 @@ class Tournament {
       'points_for_loss': pointsForLoss,
       'created_at': createdAt.toIso8601String(),
       'status': status,
+      'use_roulette': useRoulette ? 1 : 0,
+      'roulette_pool': roulettePool.join(','),
+      'roulette_unique': rouletteUnique ? 1 : 0,
+      'roulette_round_unique': rouletteRoundUnique ? 1 : 0,
     };
   }
 
   factory Tournament.fromMap(Map<String, dynamic> map) {
+    final poolStr = map['roulette_pool'] as String? ?? '';
     return Tournament(
       id: map['id'] as int?,
       name: map['name'] as String,
@@ -51,6 +64,10 @@ class Tournament {
       pointsForLoss: map['points_for_loss'] as int? ?? 0,
       createdAt: DateTime.parse(map['created_at'] as String),
       status: map['status'] as String? ?? 'active',
+      useRoulette: (map['use_roulette'] as int? ?? 0) == 1,
+      roulettePool: poolStr.trim().isEmpty ? [] : poolStr.split(','),
+      rouletteUnique: (map['roulette_unique'] as int? ?? 1) == 1,
+      rouletteRoundUnique: (map['roulette_round_unique'] as int? ?? 1) == 1,
     );
   }
 
@@ -64,6 +81,10 @@ class Tournament {
     int? pointsForLoss,
     DateTime? createdAt,
     String? status,
+    bool? useRoulette,
+    List<String>? roulettePool,
+    bool? rouletteUnique,
+    bool? rouletteRoundUnique,
   }) {
     return Tournament(
       id: id ?? this.id,
@@ -75,6 +96,11 @@ class Tournament {
       pointsForLoss: pointsForLoss ?? this.pointsForLoss,
       createdAt: createdAt ?? this.createdAt,
       status: status ?? this.status,
+      useRoulette: useRoulette ?? this.useRoulette,
+      roulettePool: roulettePool ?? this.roulettePool,
+      rouletteUnique: rouletteUnique ?? this.rouletteUnique,
+      rouletteRoundUnique: rouletteRoundUnique ?? this.rouletteRoundUnique,
     );
   }
 }
+
