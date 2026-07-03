@@ -21,7 +21,7 @@ class ElBoutoulaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TournamentProvider()),
       ],
       child: MaterialApp(
-        title: 'El Boutoula - League Maker',
+        title: 'El Boutoula',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
         home: const DashboardScreen(),
