@@ -1,6 +1,6 @@
-# El Boutoula
+# Fixtura
 
-El Boutoula is a Flutter app for organizing local tournaments, leagues, brackets, and roulette-based draft flows. It is built for mobile first, with a polished dark UI, persistent local storage, and a focused set of tournament management tools.
+Fixtura is a Flutter app for organizing local tournaments, leagues, brackets, and roulette-based draft flows. It is built for mobile first, with a polished dark UI, persistent local storage, and a focused set of tournament management tools.
 
 ## What It Does
 

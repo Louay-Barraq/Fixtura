@@ -39,12 +39,12 @@ class MatchCard extends StatelessWidget {
     final awayAssignedTeam = assignedTeamResolver?.call(awayTeam, roundNumber) ?? awayTeam?.assignedTeam;
 
     // Resolve displayed names
-    final homeName = homeTeam != null 
-      ? (homeAssignedTeam != null ? '${homeTeam!.name} ($homeAssignedTeam)' : homeTeam!.name)
-        : (match.homeTeamId == null && isByeMatch ? 'BYE' : 'TBD');
-    final awayName = awayTeam != null
-      ? (awayAssignedTeam != null ? '${awayTeam!.name} ($awayAssignedTeam)' : awayTeam!.name)
-        : (match.awayTeamId == null && isByeMatch ? 'BYE' : 'TBD');
+    // final homeName = homeTeam != null 
+    //   ? (homeAssignedTeam != null ? '${homeTeam!.name} ($homeAssignedTeam)' : homeTeam!.name)
+    //     : (match.homeTeamId == null && isByeMatch ? 'BYE' : 'TBD');
+    // final awayName = awayTeam != null
+    //   ? (awayAssignedTeam != null ? '${awayTeam!.name} ($awayAssignedTeam)' : awayTeam!.name)
+    //     : (match.awayTeamId == null && isByeMatch ? 'BYE' : 'TBD');
 
     final homeColor = homeTeam != null ? _parseColor(homeTeam!.colorHex) : AppTheme.divider;
     final awayColor = awayTeam != null ? _parseColor(awayTeam!.colorHex) : AppTheme.divider;

@@ -5,14 +5,13 @@ import 'theme/app_theme.dart';
 import 'screens/dashboard_screen.dart';
 
 void main() {
-  // Ensure Flutter bindings are initialized
   WidgetsFlutterBinding.ensureInitialized();
 
-  runApp(const ElBoutoulaApp());
+  runApp(const FixturaApp());
 }
 
-class ElBoutoulaApp extends StatelessWidget {
-  const ElBoutoulaApp({super.key});
+class FixturaApp extends StatelessWidget {
+  const FixturaApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -21,7 +20,7 @@ class ElBoutoulaApp extends StatelessWidget {
         ChangeNotifierProvider(create: (_) => TournamentProvider()),
       ],
       child: MaterialApp(
-        title: 'El Boutoula',
+        title: 'Fixtura',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
         home: const DashboardScreen(),

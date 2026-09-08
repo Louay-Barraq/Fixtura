@@ -1,4 +1,4 @@
-package com.louay.elboutoula.elboutoula
+package com.louaybarraq.fixtura
 
 import io.flutter.embedding.android.FlutterActivity
 

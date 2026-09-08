@@ -89,13 +89,13 @@ BEGIN
     BEGIN
         BLOCK "040904e4"
         BEGIN
-            VALUE "CompanyName", "com.louay.elboutoula" "\0"
-            VALUE "FileDescription", "elboutoula" "\0"
+            VALUE "CompanyName", "com.louay.fixtura" "\0"
+            VALUE "FileDescription", "fixtura" "\0"
             VALUE "FileVersion", VERSION_AS_STRING "\0"
-            VALUE "InternalName", "elboutoula" "\0"
-            VALUE "LegalCopyright", "Copyright (C) 2026 com.louay.elboutoula. All rights reserved." "\0"
-            VALUE "OriginalFilename", "elboutoula.exe" "\0"
-            VALUE "ProductName", "elboutoula" "\0"
+            VALUE "InternalName", "fixtura" "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2026 com.louay.fixtura. All rights reserved." "\0"
+            VALUE "OriginalFilename", "fixtura.exe" "\0"
+            VALUE "ProductName", "fixtura" "\0"
             VALUE "ProductVersion", VERSION_AS_STRING "\0"
         END
     END

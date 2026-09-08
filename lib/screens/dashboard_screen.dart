@@ -50,7 +50,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
                           shaderCallback: (bounds) => AppTheme.primaryGradient.createShader(bounds),
                           child: const Center(
                             child: Text(
-                            'EL BOUTOULA',
+                            'FIXTURA',
                             style: TextStyle(
                               fontSize: 28,
                               fontWeight: FontWeight.w900,
