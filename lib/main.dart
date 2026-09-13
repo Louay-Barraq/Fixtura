@@ -1,17 +1,22 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'providers/tournament_provider.dart';
 import 'theme/app_theme.dart';
 import 'screens/dashboard_screen.dart';
+import 'screens/onboarding_screen.dart';
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  final prefs = await SharedPreferences.getInstance();
+  final bool hasSeenOnboarding = prefs.getBool('hasSeenOnboarding') ?? false;
 
-  runApp(const FixturaApp());
+  runApp(FixturaApp(hasSeenOnboarding: hasSeenOnboarding));
 }
 
 class FixturaApp extends StatelessWidget {
-  const FixturaApp({super.key});
+  final bool hasSeenOnboarding;
+  const FixturaApp({super.key, this.hasSeenOnboarding = true});
 
   @override
   Widget build(BuildContext context) {
@@ -23,8 +28,9 @@ class FixturaApp extends StatelessWidget {
         title: 'Fixtura',
         theme: AppTheme.darkTheme,
         debugShowCheckedModeBanner: false,
-        home: const DashboardScreen(),
+        home: hasSeenOnboarding ? const DashboardScreen() : const OnboardingScreen(),
       ),
     );
   }
 }
+
