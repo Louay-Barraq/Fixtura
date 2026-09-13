@@ -27,7 +27,7 @@ class QuickActionCard extends StatelessWidget {
               BoxShadow(
                 offset: const Offset(0, 2),
                 blurRadius: 4,
-                spreadRadius: 0,
+                spreadRadius: 1,
                 color: Colors.black.withValues(alpha: 0.25),
               ),
             ],
