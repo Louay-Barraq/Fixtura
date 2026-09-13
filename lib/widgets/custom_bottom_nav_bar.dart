@@ -24,7 +24,6 @@ class CustomBottomNavBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: _barHeight,
       decoration: BoxDecoration(
         color: const Color(0xFFFFFCFC),
         boxShadow: [
@@ -35,35 +34,41 @@ class CustomBottomNavBar extends StatelessWidget {
           ),
         ],
       ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _NavItem(
-            label: 'Home',
-            selected: currentIndex == 0,
-            painterBuilder: (color) => _HouseIconPainter(color),
-            onTap: () => onTap(0),
+      child: SafeArea(
+        top: false,
+        child: SizedBox(
+          height: _barHeight,
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
+            children: [
+              _NavItem(
+                label: 'Home',
+                selected: currentIndex == 0,
+                painterBuilder: (color) => _HouseIconPainter(color),
+                onTap: () => onTap(0),
+              ),
+              _NavItem(
+                label: 'Create',
+                selected: false,
+                alwaysFilled: false,
+                painterBuilder: (color) => _PlusIconPainter(color),
+                onTap: onCreateTap,
+              ),
+              _NavItem(
+                label: 'Tournaments',
+                selected: currentIndex == 1,
+                painterBuilder: (color) => _BracketIconPainter(color),
+                onTap: () => onTap(1),
+              ),
+              _NavItem(
+                label: 'Roulette',
+                selected: currentIndex == 2,
+                painterBuilder: (color) => _WheelIconPainter(color),
+                onTap: () => onTap(2),
+              ),
+            ],
           ),
-          _NavItem(
-            label: 'Create',
-            selected: false,
-            alwaysFilled: false,
-            painterBuilder: (color) => _PlusIconPainter(color),
-            onTap: onCreateTap,
-          ),
-          _NavItem(
-            label: 'Tournaments',
-            selected: currentIndex == 1,
-            painterBuilder: (color) => _BracketIconPainter(color),
-            onTap: () => onTap(1),
-          ),
-          _NavItem(
-            label: 'Roulette',
-            selected: currentIndex == 2,
-            painterBuilder: (color) => _WheelIconPainter(color),
-            onTap: () => onTap(2),
-          ),
-        ],
+        ),
       ),
     );
   }

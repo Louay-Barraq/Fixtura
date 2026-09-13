@@ -199,11 +199,11 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
       children: [
         // Horizontally Scrollable Round Chips Selector
         SizedBox(
-          height: 40,
+          height: 52,
           child: ListView.builder(
             scrollDirection: Axis.horizontal,
             physics: const BouncingScrollPhysics(),
-            padding: const EdgeInsets.symmetric(horizontal: 20),
+            padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
             itemCount: sortedRounds.length,
             itemBuilder: (context, index) {
               final rNum = sortedRounds[index];

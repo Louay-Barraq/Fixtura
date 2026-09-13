@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 
 class DynamicInput extends StatefulWidget {
   final String hintText;
+  final String tagType;
   final ValueChanged<List<String>>? onTagsChanged;
 
   const DynamicInput({
     super.key,
     this.hintText = 'Enter a value...',
     this.onTagsChanged,
+    required this.tagType,
   });
 
   @override
@@ -124,7 +126,7 @@ class _DynamicInputState extends State<DynamicInput> {
             padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 4),
             child: Center(
               child: Text(
-                "Teams: ${_tags.length}",
+                "${widget.tagType}: ${_tags.length}",
                 style: TextStyle(fontFamily: 'RobotoMono', fontSize: 14),
               ),
             ),
