@@ -3,11 +3,13 @@ import 'package:flutter/material.dart';
 class DynamicInput extends StatefulWidget {
   final String hintText;
   final String tagType;
+  final List<String> initialTags;
   final ValueChanged<List<String>>? onTagsChanged;
 
   const DynamicInput({
     super.key,
     this.hintText = 'Enter a value...',
+    this.initialTags = const [],
     this.onTagsChanged,
     required this.tagType,
   });
@@ -18,7 +20,13 @@ class DynamicInput extends StatefulWidget {
 
 class _DynamicInputState extends State<DynamicInput> {
   final TextEditingController _textController = TextEditingController();
-  final List<String> _tags = [];
+  late final List<String> _tags;
+
+  @override
+  void initState() {
+    super.initState();
+    _tags = List.from(widget.initialTags);
+  }
 
   void _addTag() {
     final text = _textController.text.trim();

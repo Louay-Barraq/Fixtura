@@ -25,11 +25,14 @@ class CustomMatchCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final isByeMatch = match.homeTeamId == null || match.awayTeamId == null;
+    final isByeMatch = (match.homeTeamId == null || match.awayTeamId == null) &&
+        (tournamentType == TournamentType.roundRobin ||
+            (tournamentType == TournamentType.knockout && (match.homeTeamId != null || match.awayTeamId != null) && match.isPlayed));
+    final isTbdMatch = (match.homeTeamId == null || match.awayTeamId == null) && !isByeMatch;
     final isPlayed = match.isPlayed;
 
-    final homePlayerName = homeTeam?.name ?? (match.homeTeamId == null && isByeMatch ? 'BYE' : 'TBD');
-    final awayPlayerName = awayTeam?.name ?? (match.awayTeamId == null && isByeMatch ? 'BYE' : 'TBD');
+    final homePlayerName = homeTeam?.name ?? (isByeMatch && match.homeTeamId == null ? 'BYE' : 'TBD');
+    final awayPlayerName = awayTeam?.name ?? (isByeMatch && match.awayTeamId == null ? 'BYE' : 'TBD');
 
     final homeAssignedTeam = assignedTeamResolver?.call(homeTeam, roundNumber) ?? homeTeam?.assignedTeam;
     final awayAssignedTeam = assignedTeamResolver?.call(awayTeam, roundNumber) ?? awayTeam?.assignedTeam;
@@ -50,7 +53,7 @@ class CustomMatchCard extends StatelessWidget {
         ],
       ),
       child: InkWell(
-        onTap: isByeMatch
+        onTap: (isByeMatch || isTbdMatch)
             ? null
             : () {
                 showModalBottomSheet(

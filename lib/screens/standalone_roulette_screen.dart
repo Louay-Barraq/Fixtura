@@ -50,6 +50,7 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
                     DynamicInput(
                       tagType: 'Options',
                       hintText: 'Enter roulette option...',
+                      initialTags: _options,
                       onTagsChanged: (tags) {
                         setState(() {
                           _options = List.from(tags);

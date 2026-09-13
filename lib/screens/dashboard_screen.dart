@@ -5,6 +5,7 @@ import 'package:gap/gap.dart';
 import '../providers/tournament_provider.dart';
 import '../models/tournament.dart';
 import '../models/match.dart';
+import '../models/team.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/custom_bottom_nav_bar.dart';
 import '../widgets/stat_card.dart';
@@ -61,9 +62,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: const Color(0xFFFFFCFC),
-      body: SafeArea(
+    return PopScope(
+      canPop: _currentNavIndex == 0,
+      onPopInvokedWithResult: (didPop, result) {
+        if (didPop) return;
+        if (_currentNavIndex != 0) {
+          setState(() {
+            _currentNavIndex = 0;
+          });
+        }
+      },
+      child: Scaffold(
+        backgroundColor: const Color(0xFFFFFCFC),
+        body: SafeArea(
         child: Column(
           children: [
             // Fixed Top App Bar
@@ -119,6 +130,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
         },
         onCreateTap: _navigateToCreate,
       ),
+    ),
     );
   }
 
@@ -264,13 +276,8 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Helper to map Tournament data model to TournamentCard widget
   Widget _buildTournamentWidget(Tournament t, TournamentProvider provider) {
-    // If active tournament is currently loaded, use activeMatches; otherwise fallback
-    final matches = provider.activeTournament?.id == t.id
-        ? provider.activeMatches
-        : <MatchModel>[];
-    final teams = provider.activeTournament?.id == t.id
-        ? provider.activeTeams
-        : [];
+    final matches = t.id != null ? provider.getMatchesForTournamentId(t.id!) : <MatchModel>[];
+    final teams = t.id != null ? provider.getTeamsForTournamentId(t.id!) : <Team>[];
     final completedMatches = matches.where((m) => m.isPlayed).length;
     final progress = matches.isEmpty
         ? 0
@@ -283,12 +290,12 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final bool hasLastMatch = lastMatch != null;
 
     if (hasLastMatch && teams.isNotEmpty) {
-      final homeTeam = teams
-          .where((team) => team.id == lastMatch.homeTeamId)
-          .firstOrNull;
-      final awayTeam = teams
-          .where((team) => team.id == lastMatch.awayTeamId)
-          .firstOrNull;
+      final homeTeam = lastMatch.homeTeamId != null
+          ? teams.where((team) => team.id == lastMatch.homeTeamId).firstOrNull
+          : null;
+      final awayTeam = lastMatch.awayTeamId != null
+          ? teams.where((team) => team.id == lastMatch.awayTeamId).firstOrNull
+          : null;
       if (homeTeam != null) player1Name = homeTeam.name;
       if (awayTeam != null) player2Name = awayTeam.name;
     }
