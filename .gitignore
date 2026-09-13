@@ -42,3 +42,6 @@ GoogleService-Info.plist
 **/serviceAccountKey.json
 *.pem
 .env*
+
+# ─── Design References ─────────────────────────────────────────
+/screenshots/
