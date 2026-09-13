@@ -48,17 +48,17 @@ class CustomBottomNavBar extends StatelessWidget {
                 onTap: () => onTap(0),
               ),
               _NavItem(
+                label: 'Tournaments',
+                selected: currentIndex == 1,
+                painterBuilder: (color) => _BracketIconPainter(color),
+                onTap: () => onTap(1),
+              ),
+              _NavItem(
                 label: 'Create',
                 selected: false,
                 alwaysFilled: false,
                 painterBuilder: (color) => _PlusIconPainter(color),
                 onTap: onCreateTap,
-              ),
-              _NavItem(
-                label: 'Tournaments',
-                selected: currentIndex == 1,
-                painterBuilder: (color) => _BracketIconPainter(color),
-                onTap: () => onTap(1),
               ),
               _NavItem(
                 label: 'Roulette',

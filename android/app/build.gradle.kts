@@ -16,7 +16,7 @@ plugins {
 
 android {
     namespace = "com.louaybarraq.fixtura"
-    compileSdk = flutter.compileSdkVersion
+    compileSdk = flutter.compileSdkVersion ?: 36
     ndkVersion = flutter.ndkVersion
 
     compileOptions {
@@ -30,8 +30,8 @@ android {
 
     defaultConfig {
         applicationId = "com.louaybarraq.fixtura"
-        minSdk = flutter.minSdkVersion
-        targetSdk = flutter.targetSdkVersion
+        minSdk = flutter.minSdkVersion ?: 24
+        targetSdk = flutter.targetSdkVersion ?: 36
         versionCode = flutter.versionCode
         versionName = flutter.versionName
     }
