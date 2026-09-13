@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:gap/gap.dart';
 import '../models/match.dart';
 import '../models/team.dart';
 import '../models/tournament.dart';
 import '../providers/tournament_provider.dart';
-import '../theme/app_theme.dart';
+import 'short_section_header.dart';
+import 'square_button.dart';
 
 class ScoreEntryDialog extends StatefulWidget {
   final MatchModel match;
@@ -25,82 +27,34 @@ class ScoreEntryDialog extends StatefulWidget {
 }
 
 class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
-  late TextEditingController _homeScoreController;
-  late TextEditingController _awayScoreController;
-  late TextEditingController _detailsController;
-
-  int? _homeScore;
-  int? _awayScore;
-  int? _penaltyWinnerId; // Holds winner team ID in case of knockout draw
+  late int _homeScore;
+  late int _awayScore;
+  int? _penaltyWinnerId;
 
   @override
   void initState() {
     super.initState();
-    _homeScore = widget.match.homeScore;
-    _awayScore = widget.match.awayScore;
-
-    _homeScoreController = TextEditingController(text: _homeScore?.toString() ?? '');
-    _awayScoreController = TextEditingController(text: _awayScore?.toString() ?? '');
-    
-    // Parse out potential penalty info or details
-    _detailsController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _homeScoreController.dispose();
-    _awayScoreController.dispose();
-    _detailsController.dispose();
-    super.dispose();
+    _homeScore = widget.match.homeScore ?? 0;
+    _awayScore = widget.match.awayScore ?? 0;
   }
 
   void _saveScore() {
-    final homeText = _homeScoreController.text.trim();
-    final awayText = _awayScoreController.text.trim();
-
-    if (homeText.isEmpty || awayText.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter scores for both teams.'), backgroundColor: AppTheme.accent),
-      );
-      return;
-    }
-
-    final hScore = int.tryParse(homeText);
-    final aScore = int.tryParse(awayText);
-
-    if (hScore == null || aScore == null) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please enter valid numbers for scores.'), backgroundColor: AppTheme.accent),
-      );
-      return;
-    }
-
-    // For Knockouts, if scores are equal, we need a tie-breaker decision
-    if (widget.tournamentType == TournamentType.knockout && hScore == aScore) {
+    if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
       if (_penaltyWinnerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('A draw is not allowed in Knockout matches. Please select a penalty/shootout winner.'),
-            backgroundColor: AppTheme.accent,
+            content: Text('A draw is not allowed in Knockouts. Please select a penalty winner.'),
+            backgroundColor: Color(0xFFD71212),
           ),
         );
         return;
       }
     }
 
-    // If it was a draw, adjust the scores in the database to reflect the winner for propagation
-    int finalHScore = hScore;
-    int finalAScore = aScore;
+    int finalHScore = _homeScore;
+    int finalAScore = _awayScore;
 
-    if (widget.tournamentType == TournamentType.knockout && hScore == aScore) {
-      // We store the score with a virtual +1 goal to the winner to denote progress in DB, 
-      // or we can let the propagation use the penalty winner.
-      // Actually, since the provider's propagation logic compares homeScore > awayScore,
-      // if it's a draw, we can virtually adjust the database score by +1 to the penalty winner 
-      // (e.g. if it is 2-2, and Home won penalties, we save it as 3-2 or let user type 3-2 after pens, 
-      // or we can adjust it here so it propagates correctly!).
-      // Let's adjust it by adding 1 to the winner's score to make it clear who won, 
-      // and append a note in the details: "Win on penalties".
+    if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
       if (_penaltyWinnerId == widget.homeTeam?.id) {
         finalHScore += 1;
       } else {
@@ -125,27 +79,20 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
     final homeName = widget.homeTeam?.name ?? 'TBD';
     final awayName = widget.awayTeam?.name ?? 'TBD';
     final isKnockout = widget.tournamentType == TournamentType.knockout;
-
-    // Listen to changes in the text controllers to check if a tiebreaker is needed
-    bool isTie = false;
-    final hVal = int.tryParse(_homeScoreController.text);
-    final aVal = int.tryParse(_awayScoreController.text);
-    if (hVal != null && aVal != null && hVal == aVal) {
-      isTie = true;
-    }
+    final isTie = _homeScore == _awayScore;
 
     return Container(
       padding: EdgeInsets.only(
         left: 20,
         right: 20,
-        top: 20,
+        top: 16,
         bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20,
       ),
       decoration: const BoxDecoration(
-        color: AppTheme.surface,
+        color: Color(0xFFFFFCFC),
         borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(24),
-          topRight: Radius.circular(24),
+          topLeft: Radius.circular(16),
+          topRight: Radius.circular(16),
         ),
       ),
       child: SingleChildScrollView(
@@ -153,183 +100,142 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            // Handle bar
+            // Top Handle Indicator Bar
             Center(
               child: Container(
                 width: 40,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppTheme.divider,
+                  color: Colors.black.withValues(alpha: 0.2),
                   borderRadius: BorderRadius.circular(2),
                 ),
               ),
             ),
-            const SizedBox(height: 20),
+            const Gap(16),
 
             // Header Title
-            Text(
-              widget.match.roundName,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                color: AppTheme.primary,
-                fontWeight: FontWeight.bold,
-                fontSize: 16,
-                letterSpacing: 1,
+            Center(
+              child: ShortSectionHeader(
+                title: widget.match.roundName.toUpperCase(),
               ),
             ),
-            const SizedBox(height: 24),
+            const Gap(24),
 
-            // Score Entry Row
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-              children: [
-                // Home Team
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        homeName,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: 70,
-                        child: TextField(
-                          controller: _homeScoreController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: AppTheme.divider),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: AppTheme.primary, width: 2),
-                            ),
-                            filled: true,
-                            fillColor: AppTheme.surfaceLight,
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                    ],
+            // Score Entry Box Card
+            Container(
+              padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF1F1F1),
+                borderRadius: BorderRadius.circular(10),
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 2),
+                    blurRadius: 4,
+                    spreadRadius: 0,
+                    color: Colors.black.withValues(alpha: 0.25),
                   ),
-                ),
-
-                const Text(
-                  'VS',
-                  style: TextStyle(color: AppTheme.textSecondary, fontWeight: FontWeight.w900, fontSize: 18),
-                ),
-
-                // Away Team
-                Expanded(
-                  child: Column(
-                    children: [
-                      Text(
-                        awayName,
-                        textAlign: TextAlign.center,
-                        style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: AppTheme.textPrimary),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                      const SizedBox(height: 12),
-                      SizedBox(
-                        width: 70,
-                        child: TextField(
-                          controller: _awayScoreController,
-                          keyboardType: TextInputType.number,
-                          textAlign: TextAlign.center,
-                          style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: AppTheme.textPrimary),
-                          decoration: InputDecoration(
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
-                            enabledBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: AppTheme.divider),
-                            ),
-                            focusedBorder: OutlineInputBorder(
-                              borderRadius: BorderRadius.circular(12),
-                              borderSide: const BorderSide(color: AppTheme.primary, width: 2),
-                            ),
-                            filled: true,
-                            fillColor: AppTheme.surfaceLight,
-                          ),
-                          onChanged: (_) => setState(() {}),
-                        ),
-                      ),
-                    ],
+                ],
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  // Home Player Counter
+                  Expanded(
+                    child: _buildTeamCounter(
+                      name: homeName,
+                      score: _homeScore,
+                      onDecrement: () {
+                        if (_homeScore > 0) {
+                          setState(() => _homeScore--);
+                        }
+                      },
+                      onIncrement: () {
+                        setState(() => _homeScore++);
+                      },
+                    ),
                   ),
-                ),
-              ],
+
+                  // Center Dash separator
+                  const Padding(
+                    padding: EdgeInsets.symmetric(horizontal: 10),
+                    child: Text(
+                      '—',
+                      style: TextStyle(
+                        fontFamily: 'RobotoMono',
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                  ),
+
+                  // Away Player Counter
+                  Expanded(
+                    child: _buildTeamCounter(
+                      name: awayName,
+                      score: _awayScore,
+                      onDecrement: () {
+                        if (_awayScore > 0) {
+                          setState(() => _awayScore--);
+                        }
+                      },
+                      onIncrement: () {
+                        setState(() => _awayScore++);
+                      },
+                    ),
+                  ),
+                ],
+              ),
             ),
-            const SizedBox(height: 20),
+            const Gap(20),
 
-            // Tie breaker option for knockout draws
+            // Tie breaker option for Knockout matches when scores are tied
             if (isKnockout && isTie) ...[
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(14),
                 decoration: BoxDecoration(
-                  color: AppTheme.surfaceLight,
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: AppTheme.primary.withOpacity(0.3)),
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(8),
+                  border: Border.all(color: const Color(0xFFD71212), width: 1.5),
+                  boxShadow: [
+                    BoxShadow(
+                      offset: const Offset(0, 2),
+                      blurRadius: 4,
+                      spreadRadius: 0,
+                      color: Colors.black.withValues(alpha: 0.15),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
-                    const Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.emoji_events_outlined, color: AppTheme.primary, size: 16),
-                        SizedBox(width: 6),
-                        Text(
-                          'Knockout Tiebreaker Required',
-                          style: TextStyle(color: AppTheme.primary, fontSize: 12, fontWeight: FontWeight.bold),
-                        ),
-                      ],
-                    ),
-                    const SizedBox(height: 8),
                     const Text(
-                      'Select the team that wins penalties/advances:',
-                      textAlign: TextAlign.center,
-                      style: TextStyle(color: AppTheme.textSecondary, fontSize: 12),
+                      'PENALTY SHOOTOUT WINNER',
+                      style: TextStyle(
+                        fontFamily: 'BebasNeue',
+                        fontSize: 16,
+                        color: Color(0xFFD71212),
+                        letterSpacing: 1,
+                      ),
                     ),
-                    const SizedBox(height: 12),
+                    const Gap(10),
                     Row(
                       children: [
                         Expanded(
-                          child: ChoiceChip(
-                            label: Text(homeName),
-                            selected: _penaltyWinnerId == widget.homeTeam?.id,
-                            selectedColor: AppTheme.primary.withOpacity(0.2),
-                            labelStyle: TextStyle(
-                              color: _penaltyWinnerId == widget.homeTeam?.id ? AppTheme.primary : AppTheme.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() => _penaltyWinnerId = widget.homeTeam?.id);
-                              }
+                          child: _buildPenaltyOption(
+                            name: homeName,
+                            isSelected: _penaltyWinnerId == widget.homeTeam?.id,
+                            onTap: () {
+                              setState(() => _penaltyWinnerId = widget.homeTeam?.id);
                             },
                           ),
                         ),
-                        const SizedBox(width: 8),
+                        const Gap(10),
                         Expanded(
-                          child: ChoiceChip(
-                            label: Text(awayName),
-                            selected: _penaltyWinnerId == widget.awayTeam?.id,
-                            selectedColor: AppTheme.primary.withOpacity(0.2),
-                            labelStyle: TextStyle(
-                              color: _penaltyWinnerId == widget.awayTeam?.id ? AppTheme.primary : AppTheme.textSecondary,
-                              fontWeight: FontWeight.bold,
-                            ),
-                            onSelected: (selected) {
-                              if (selected) {
-                                setState(() => _penaltyWinnerId = widget.awayTeam?.id);
-                              }
+                          child: _buildPenaltyOption(
+                            name: awayName,
+                            isSelected: _penaltyWinnerId == widget.awayTeam?.id,
+                            onTap: () {
+                              setState(() => _penaltyWinnerId = widget.awayTeam?.id);
                             },
                           ),
                         ),
@@ -338,49 +244,74 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20),
+              const Gap(20),
             ],
 
-            // Save / Action buttons
+            // Action Buttons (SAVE RESULT / RESET SCORE)
             Row(
               children: [
-                if (widget.match.isPlayed)
+                if (widget.match.isPlayed) ...[
                   Expanded(
-                    child: OutlinedButton(
-                      onPressed: _clearScore,
-                      style: OutlinedButton.styleFrom(
-                        side: const BorderSide(color: AppTheme.accent),
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                        padding: const EdgeInsets.symmetric(vertical: 14),
-                      ),
-                      child: const Text(
-                        'RESET SCORE',
-                        style: TextStyle(color: AppTheme.accent, fontWeight: FontWeight.bold),
+                    child: GestureDetector(
+                      onTap: _clearScore,
+                      child: Container(
+                        height: 48,
+                        decoration: BoxDecoration(
+                          color: Colors.white,
+                          borderRadius: BorderRadius.circular(6),
+                          border: Border.all(color: const Color(0xFFD71212), width: 1.5),
+                          boxShadow: [
+                            BoxShadow(
+                              offset: const Offset(0, 2),
+                              blurRadius: 4,
+                              spreadRadius: 0,
+                              color: Colors.black.withValues(alpha: 0.15),
+                            ),
+                          ],
+                        ),
+                        child: const Center(
+                          child: Text(
+                            'RESET SCORE',
+                            style: TextStyle(
+                              fontFamily: 'BebasNeue',
+                              fontSize: 18,
+                              color: Color(0xFFD71212),
+                              letterSpacing: 1.2,
+                            ),
+                          ),
+                        ),
                       ),
                     ),
                   ),
-                if (widget.match.isPlayed) const SizedBox(width: 12),
+                  const Gap(12),
+                ],
                 Expanded(
                   flex: 2,
-                  child: ElevatedButton(
-                    onPressed: _saveScore,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Colors.transparent,
-                      elevation: 0,
-                      padding: EdgeInsets.zero,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    ),
-                    child: Ink(
+                  child: GestureDetector(
+                    onTap: _saveScore,
+                    child: Container(
+                      height: 48,
                       decoration: BoxDecoration(
-                        gradient: AppTheme.primaryGradient,
-                        borderRadius: BorderRadius.circular(12),
+                        color: const Color(0xFFD71212),
+                        borderRadius: BorderRadius.circular(6),
+                        boxShadow: [
+                          BoxShadow(
+                            offset: const Offset(0, 2),
+                            blurRadius: 4,
+                            spreadRadius: 0,
+                            color: Colors.black.withValues(alpha: 0.25),
+                          ),
+                        ],
                       ),
-                      child: Container(
-                        height: 48,
-                        alignment: Alignment.center,
-                        child: const Text(
+                      child: const Center(
+                        child: Text(
                           'SAVE RESULT',
-                          style: TextStyle(color: AppTheme.background, fontWeight: FontWeight.bold),
+                          style: TextStyle(
+                            fontFamily: 'BebasNeue',
+                            fontSize: 20,
+                            color: Colors.white,
+                            letterSpacing: 1.5,
+                          ),
                         ),
                       ),
                     ),
@@ -389,6 +320,100 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
               ],
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTeamCounter({
+    required String name,
+    required int score,
+    required VoidCallback onDecrement,
+    required VoidCallback onIncrement,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          name,
+          textAlign: TextAlign.center,
+          style: const TextStyle(
+            fontFamily: 'RobotoMono',
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+            color: Colors.black,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+        ),
+        const Gap(10),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            SquareButton(icon: Icons.remove, onTap: onDecrement),
+            Container(
+              width: 40,
+              height: 32,
+              margin: const EdgeInsets.symmetric(horizontal: 6),
+              decoration: BoxDecoration(
+                color: Colors.black,
+                borderRadius: BorderRadius.circular(6),
+                boxShadow: [
+                  BoxShadow(
+                    offset: const Offset(0, 2),
+                    blurRadius: 3,
+                    spreadRadius: 0,
+                    color: Colors.black.withValues(alpha: 0.25),
+                  ),
+                ],
+              ),
+              child: Center(
+                child: Text(
+                  '$score',
+                  style: const TextStyle(
+                    fontFamily: 'RobotoMono',
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+            ),
+            SquareButton(icon: Icons.add, onTap: onIncrement),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildPenaltyOption({
+    required String name,
+    required bool isSelected,
+    required VoidCallback onTap,
+  }) {
+    return GestureDetector(
+      onTap: onTap,
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.black : const Color(0xFFF1F1F1),
+          borderRadius: BorderRadius.circular(6),
+          border: Border.all(
+            color: isSelected ? Colors.black : Colors.grey.shade400,
+          ),
+        ),
+        child: Text(
+          name,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontFamily: 'RobotoMono',
+            fontSize: 12,
+            fontWeight: FontWeight.bold,
+            color: isSelected ? Colors.white : Colors.black,
+          ),
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
         ),
       ),
     );
