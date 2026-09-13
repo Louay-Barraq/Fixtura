@@ -276,14 +276,18 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
   /// Helper to map Tournament data model to TournamentCard widget
   Widget _buildTournamentWidget(Tournament t, TournamentProvider provider) {
-    final matches = t.id != null ? provider.getMatchesForTournamentId(t.id!) : <MatchModel>[];
+    final allMatches = t.id != null ? provider.getMatchesForTournamentId(t.id!) : <MatchModel>[];
     final teams = t.id != null ? provider.getTeamsForTournamentId(t.id!) : <Team>[];
-    final completedMatches = matches.where((m) => m.isPlayed).length;
-    final progress = matches.isEmpty
-        ? 0
-        : ((completedMatches / matches.length) * 100).round();
 
-    final lastMatch = matches.where((m) => m.isPlayed).toList().lastOrNull;
+    // Exclude dummy BYE matches (where either team is null)
+    final playableMatches = allMatches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
+    final completedMatches = playableMatches.where((m) => m.isPlayed).length;
+    final progress = playableMatches.isEmpty
+        ? 0
+        : ((completedMatches / playableMatches.length) * 100).round();
+
+    // Pick the most recent real played match
+    final lastMatch = playableMatches.where((m) => m.isPlayed).toList().lastOrNull;
 
     String? player1Name;
     String? player2Name;
