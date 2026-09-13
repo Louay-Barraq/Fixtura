@@ -170,6 +170,9 @@ class TournamentProvider extends ChangeNotifier {
     if (tournament == null) return const [];
 
     final usedTeams = <String>{};
+
+    // Constraint 1 (rouletteRoundUnique): this player must not get a team
+    // they already hold in any OTHER round.
     if (tournament.rouletteRoundUnique) {
       final assignmentsForTeam = assignmentsByTeam[team.id] ?? const {};
       for (final entry in assignmentsForTeam.entries) {
@@ -179,7 +182,21 @@ class TournamentProvider extends ChangeNotifier {
       }
     }
 
-    return tournament.roulettePool.where((option) => !usedTeams.contains(option)).toList();
+    // Constraint 2 (rouletteUnique): no two players may hold the same team
+    // in the SAME round.
+    if (tournament.rouletteUnique) {
+      for (final entry in assignmentsByTeam.entries) {
+        if (entry.key == team.id) continue; // skip self
+        final teamForRound = entry.value[roundNumber];
+        if (teamForRound != null) {
+          usedTeams.add(teamForRound);
+        }
+      }
+    }
+
+    return tournament.roulettePool
+        .where((option) => !usedTeams.contains(option))
+        .toList();
   }
 
   List<int> getRouletteRounds() {
@@ -300,8 +317,11 @@ class TournamentProvider extends ChangeNotifier {
           );
 
           if (availableTeams.isEmpty) {
-            if (_activeTournament!.rouletteRoundUnique) {
-              throw StateError('Not enough roulette teams to draft round $roundNumber for ${team.name}.');
+            if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
+              throw StateError(
+                'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
+                'Add more teams to the roulette pool or relax the uniqueness constraints.',
+              );
             }
             continue;
           }
@@ -355,8 +375,11 @@ class TournamentProvider extends ChangeNotifier {
               assignmentsByTeam: workingAssignments,
             );
             if (availableTeams.isEmpty) {
-              if (_activeTournament!.rouletteRoundUnique) {
-                throw StateError('Not enough roulette teams to draft round $roundNumber for ${team.name}.');
+              if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
+                throw StateError(
+                  'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
+                  'Add more teams to the roulette pool or relax the uniqueness constraints.',
+                );
               }
               continue;
             }
