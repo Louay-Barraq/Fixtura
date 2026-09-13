@@ -223,7 +223,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           FormatOptionCard(
                             title: 'League',
                             subtitle: 'Round-Robin',
-                            icon: Icons.star_border,
+                            icon: Icons.leaderboard_rounded,
                             isSelected: _type == TournamentType.roundRobin,
                             onTap: () => setState(
                               () => _type = TournamentType.roundRobin,
@@ -233,7 +233,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           FormatOptionCard(
                             title: 'BRACKETS',
                             subtitle: 'Knockout',
-                            icon: Icons.star,
+                            customPainter: (color) => _BracketFormatIconPainter(color),
                             isSelected: _type == TournamentType.knockout,
                             onTap: () =>
                                 setState(() => _type = TournamentType.knockout),
@@ -380,4 +380,39 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
       ),
     );
   }
+}
+
+class _BracketFormatIconPainter extends CustomPainter {
+  final Color color;
+  _BracketFormatIconPainter(this.color);
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0
+      ..strokeCap = StrokeCap.round
+      ..strokeJoin = StrokeJoin.round;
+
+    final w = size.width;
+    final h = size.height;
+
+    // Bracket lines: two inputs converging into a single match line
+    final path = Path()
+      ..moveTo(w * 0.18, h * 0.24)
+      ..lineTo(w * 0.50, h * 0.24)
+      ..moveTo(w * 0.18, h * 0.76)
+      ..lineTo(w * 0.50, h * 0.76)
+      ..moveTo(w * 0.50, h * 0.24)
+      ..lineTo(w * 0.50, h * 0.76)
+      ..moveTo(w * 0.50, h * 0.50)
+      ..lineTo(w * 0.84, h * 0.50);
+
+    canvas.drawPath(path, paint);
+  }
+
+  @override
+  bool shouldRepaint(covariant _BracketFormatIconPainter oldDelegate) =>
+      oldDelegate.color != color;
 }
