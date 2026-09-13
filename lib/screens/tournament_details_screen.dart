@@ -17,6 +17,7 @@ import '../widgets/custom_roulette_wheel.dart';
 import '../widgets/dropdown_tile.dart';
 import '../widgets/player_status_tile.dart';
 import '../widgets/roulette_actions_bottom_bar.dart';
+import 'edit_tournament_screen.dart';
 
 class TournamentDetailsScreen extends StatefulWidget {
   final int tournamentId;
@@ -98,9 +99,10 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
           }
         }
 
-        // Calculate progress percentage
-        final completedMatches = matches.where((m) => m.isPlayed).length;
-        final progress = matches.isEmpty ? 0 : ((completedMatches / matches.length) * 100).round();
+        // Calculate progress percentage (excluding dummy BYE matches)
+        final playableMatches = matches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
+        final completedMatches = playableMatches.where((m) => m.isPlayed).length;
+        final progress = playableMatches.isEmpty ? 0 : ((completedMatches / playableMatches.length) * 100).round();
 
         return Scaffold(
           backgroundColor: const Color(0xFFFFFCFC),
@@ -129,60 +131,14 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                       right: 10,
                       top: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.delete_outline, color: Color(0xFFD71212)),
+                        icon: const Icon(Icons.tune_rounded, color: Colors.black),
                         onPressed: () {
-                          showDialog(
-                            context: context,
-                            builder: (ctx) => AlertDialog(
-                              backgroundColor: Colors.white,
-                              title: const Text(
-                                'DELETE TOURNAMENT',
-                                style: TextStyle(
-                                  fontFamily: 'BebasNeue',
-                                  fontSize: 22,
-                                  color: Colors.black,
-                                ),
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => EditTournamentScreen(
+                                tournament: tournament,
                               ),
-                              content: Text(
-                                'Are you sure you want to delete "${tournament.name}"? This action cannot be undone.',
-                                style: const TextStyle(
-                                  fontFamily: 'RobotoMono',
-                                  fontSize: 13,
-                                  color: Colors.black87,
-                                ),
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(ctx),
-                                  child: const Text(
-                                    'CANCEL',
-                                    style: TextStyle(
-                                      fontFamily: 'RobotoMono',
-                                      color: Colors.black54,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                                TextButton(
-                                  onPressed: () async {
-                                    Navigator.pop(ctx);
-                                    if (tournament.id != null) {
-                                      await provider.deleteTournament(tournament.id!);
-                                      if (context.mounted) {
-                                        Navigator.pop(context);
-                                      }
-                                    }
-                                  },
-                                  child: const Text(
-                                    'DELETE',
-                                    style: TextStyle(
-                                      fontFamily: 'RobotoMono',
-                                      color: Color(0xFFD71212),
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ],
                             ),
                           );
                         },

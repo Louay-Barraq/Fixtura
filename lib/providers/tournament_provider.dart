@@ -157,6 +157,69 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
+  // Update tournament settings and player names
+  Future<bool> updateTournamentSettings({
+    required int tournamentId,
+    required String name,
+    required int pointsWin,
+    required int pointsDraw,
+    required int pointsLoss,
+    required bool useRoulette,
+    required List<String> roulettePool,
+    required bool rouletteUnique,
+    required bool rouletteRoundUnique,
+    Map<int, String>? updatedPlayerNames,
+  }) async {
+    _isLoading = true;
+    notifyListeners();
+
+    try {
+      final db = await _dbHelper.database;
+      await db.transaction((txn) async {
+        // 1. Fetch current tournament
+        final current = await _dbHelper.getTournament(tournamentId, txn);
+        if (current == null) return;
+
+        final updatedTournament = current.copyWith(
+          name: name,
+          pointsForWin: pointsWin,
+          pointsForDraw: pointsDraw,
+          pointsForLoss: pointsLoss,
+          useRoulette: useRoulette,
+          roulettePool: roulettePool,
+          rouletteUnique: rouletteUnique,
+          rouletteRoundUnique: rouletteRoundUnique,
+        );
+
+        await _dbHelper.updateTournament(updatedTournament, txn);
+
+        // 2. Update player names if provided
+        if (updatedPlayerNames != null) {
+          for (final entry in updatedPlayerNames.entries) {
+            final teamId = entry.key;
+            final newName = entry.value.trim();
+            if (newName.isNotEmpty) {
+              await txn.rawUpdate(
+                'UPDATE teams SET name = ? WHERE id = ?',
+                [newName, teamId],
+              );
+            }
+          }
+        }
+      });
+
+      await loadTournamentDetails(tournamentId);
+      await loadAllTournaments();
+      return true;
+    } catch (e) {
+      debugPrint("Error updating tournament settings: $e");
+      return false;
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   Future<Map<int, Map<int, String>>> _loadRouletteAssignments(int tournamentId) async {
     final rows = await _dbHelper.getRouletteAssignmentsForTournament(tournamentId);
     final assignments = <int, Map<int, String>>{};
