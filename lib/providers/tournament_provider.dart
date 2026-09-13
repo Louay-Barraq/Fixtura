@@ -21,7 +21,19 @@ class TournamentProvider extends ChangeNotifier {
   List<MatchModel> get activeMatches => _activeMatches;
   bool get isLoading => _isLoading;
 
+  Map<int, List<MatchModel>> _tournamentMatches = {};
+  Map<int, List<Team>> _tournamentTeams = {};
   final DatabaseHelper _dbHelper = DatabaseHelper.instance;
+
+  List<MatchModel> getMatchesForTournamentId(int id) {
+    if (_activeTournament?.id == id) return _activeMatches;
+    return _tournamentMatches[id] ?? [];
+  }
+
+  List<Team> getTeamsForTournamentId(int id) {
+    if (_activeTournament?.id == id) return _activeTeams;
+    return _tournamentTeams[id] ?? [];
+  }
 
   // Fetch all tournaments (for dashboard/history list)
   Future<void> loadAllTournaments() async {
@@ -29,6 +41,16 @@ class TournamentProvider extends ChangeNotifier {
     notifyListeners();
     try {
       _tournaments = await _dbHelper.getAllTournaments();
+      final matchesMap = <int, List<MatchModel>>{};
+      final teamsMap = <int, List<Team>>{};
+      for (final t in _tournaments) {
+        if (t.id != null) {
+          matchesMap[t.id!] = await _dbHelper.getMatchesForTournament(t.id!);
+          teamsMap[t.id!] = await _dbHelper.getTeamsForTournament(t.id!);
+        }
+      }
+      _tournamentMatches = matchesMap;
+      _tournamentTeams = teamsMap;
     } catch (e) {
       debugPrint("Error loading tournaments: $e");
     } finally {
@@ -293,8 +315,8 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
-  Future<void> autoDraftRound(int roundNumber) async {
-    if (_activeTournament == null) return;
+  Future<String?> autoDraftRound(int roundNumber) async {
+    if (_activeTournament == null) return 'No active tournament.';
 
     _isLoading = true;
     notifyListeners();
@@ -342,16 +364,18 @@ class TournamentProvider extends ChangeNotifier {
       if (_activeTournament?.id != null) {
         await loadTournamentDetails(_activeTournament!.id!);
       }
+      return null;
     } catch (e) {
       debugPrint("Error auto drafting round $roundNumber: $e");
+      return e is StateError ? e.message : 'Error auto drafting round: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<void> autoDraftAllRounds() async {
-    if (_activeTournament == null) return;
+  Future<String?> autoDraftAllRounds() async {
+    if (_activeTournament == null) return 'No active tournament.';
     
     _isLoading = true;
     notifyListeners();
@@ -402,8 +426,10 @@ class TournamentProvider extends ChangeNotifier {
       if (_activeTournament?.id != null) {
         await loadTournamentDetails(_activeTournament!.id!);
       }
+      return null;
     } catch (e) {
       debugPrint("Error in auto draft: $e");
+      return e is StateError ? e.message : 'Error auto drafting all rounds: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

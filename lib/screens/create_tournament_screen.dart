@@ -46,7 +46,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   int _estimatedRoundCount() {
     final participantCount = _playerNames.length;
     if (_type == TournamentType.roundRobin) {
-      return _legs * (participantCount - 1);
+      final effectiveTeams = participantCount.isOdd
+          ? participantCount + 1
+          : participantCount;
+      return _legs * (effectiveTeams - 1);
     }
     var rounds = 0;
     var powerOfTwo = 1;
@@ -62,7 +65,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Please enter a tournament name'),
+          content: Text(
+            'Please enter a tournament name',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Color(0xFFD71212),
         ),
       );
@@ -72,7 +78,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     if (_playerNames.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('You need at least 2 players in MANAGE PLAYERS to create a tournament.'),
+          content: Text(
+            'You need at least 2 players in MANAGE PLAYERS to create a tournament.',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Color(0xFFD71212),
         ),
       );
@@ -83,7 +92,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
       if (_teamNames.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.'),
+            content: Text(
+              'The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.',
+              style: TextStyle(color: Colors.white),
+            ),
             backgroundColor: Color(0xFFD71212),
           ),
         );
@@ -94,6 +106,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           SnackBar(
             content: Text(
               'You need at least ${_estimatedRoundCount()} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have ${_teamNames.length}).',
+              style: TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
           ),
@@ -105,6 +118,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           SnackBar(
             content: Text(
               'You need at least ${_playerNames.length} teams in MANAGE TEAMS to ensure unique assignments per player (you have ${_teamNames.length}).',
+              style: TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
           ),
@@ -118,12 +132,17 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
       name: name,
       type: _type,
       legs: _legs,
-      teamNames: _playerNames, // Players are the tournament participants (John, David, etc.)
+      teamNames:
+          _playerNames, // Players are the tournament participants (John, David, etc.)
       pointsWin: _pointsWin,
       pointsDraw: _pointsDraw,
       pointsLoss: _pointsLoss,
       useRoulette: _useRoulette,
-      roulettePool: _useRoulette ? _teamNames : (_teamNames.isNotEmpty ? _teamNames : []), // Teams used (PSG, RMA, etc.)
+      roulettePool: _useRoulette
+          ? _teamNames
+          : (_teamNames.isNotEmpty
+                ? _teamNames
+                : []), // Teams used (PSG, RMA, etc.)
       rouletteUnique: _useRoulette ? _rouletteUnique : true,
       rouletteRoundUnique: _useRoulette ? _rouletteRoundUnique : true,
     );
@@ -131,20 +150,24 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     if (tournamentId != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Tournament created successfully!'),
+          content: Text('Tournament created successfully!', style: TextStyle(color: Colors.white),),
           backgroundColor: Colors.black,
         ),
       );
       Navigator.pushReplacement(
         context,
         MaterialPageRoute(
-          builder: (context) => TournamentDetailsScreen(tournamentId: tournamentId),
+          builder: (context) =>
+              TournamentDetailsScreen(tournamentId: tournamentId),
         ),
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Failed to create tournament.'),
+          content: Text(
+            'Failed to create tournament.',
+            style: TextStyle(color: Colors.white),
+          ),
           backgroundColor: Color(0xFFD71212),
         ),
       );
@@ -202,7 +225,9 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             subtitle: 'Round-Robin',
                             icon: Icons.star_border,
                             isSelected: _type == TournamentType.roundRobin,
-                            onTap: () => setState(() => _type = TournamentType.roundRobin),
+                            onTap: () => setState(
+                              () => _type = TournamentType.roundRobin,
+                            ),
                           ),
                           const Gap(16),
                           FormatOptionCard(
@@ -210,7 +235,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             subtitle: 'Knockout',
                             icon: Icons.star,
                             isSelected: _type == TournamentType.knockout,
-                            onTap: () => setState(() => _type = TournamentType.knockout),
+                            onTap: () =>
+                                setState(() => _type = TournamentType.knockout),
                           ),
                         ],
                       ),
@@ -229,8 +255,13 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             DropdownTile(
                               title: 'Legs',
                               subtitle: 'Number of matches per pair',
-                              initialValue: _legs == 1 ? '1 LEG (SINGLE)' : '2 LEGS (DOUBLE)',
-                              options: const ['1 LEG (SINGLE)', '2 LEGS (DOUBLE)'],
+                              initialValue: _legs == 1
+                                  ? '1 LEG (SINGLE)'
+                                  : '2 LEGS (DOUBLE)',
+                              options: const [
+                                '1 LEG (SINGLE)',
+                                '2 LEGS (DOUBLE)',
+                              ],
                               onChanged: (val) {
                                 if (val != null) {
                                   setState(() {

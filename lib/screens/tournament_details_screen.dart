@@ -125,6 +125,69 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                         },
                       ),
                     ),
+                    Positioned(
+                      right: 10,
+                      top: 10,
+                      child: IconButton(
+                        icon: const Icon(Icons.delete_outline, color: Color(0xFFD71212)),
+                        onPressed: () {
+                          showDialog(
+                            context: context,
+                            builder: (ctx) => AlertDialog(
+                              backgroundColor: Colors.white,
+                              title: const Text(
+                                'DELETE TOURNAMENT',
+                                style: TextStyle(
+                                  fontFamily: 'BebasNeue',
+                                  fontSize: 22,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              content: Text(
+                                'Are you sure you want to delete "${tournament.name}"? This action cannot be undone.',
+                                style: const TextStyle(
+                                  fontFamily: 'RobotoMono',
+                                  fontSize: 13,
+                                  color: Colors.black87,
+                                ),
+                              ),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(ctx),
+                                  child: const Text(
+                                    'CANCEL',
+                                    style: TextStyle(
+                                      fontFamily: 'RobotoMono',
+                                      color: Colors.black54,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                                TextButton(
+                                  onPressed: () async {
+                                    Navigator.pop(ctx);
+                                    if (tournament.id != null) {
+                                      await provider.deleteTournament(tournament.id!);
+                                      if (context.mounted) {
+                                        Navigator.pop(context);
+                                      }
+                                    }
+                                  },
+                                  child: const Text(
+                                    'DELETE',
+                                    style: TextStyle(
+                                      fontFamily: 'RobotoMono',
+                                      color: Color(0xFFD71212),
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        },
+                      ),
+                    ),
                   ],
                 ),
                 const Gap(12),
@@ -423,8 +486,32 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
 
         // Roulette Bottom Action Buttons (AUTO DRAFT & RESET)
         RouletteActionsBottomBar(
-          onAutoDraftAllRounds: rounds.isEmpty ? () {} : () => provider.autoDraftAllRounds(),
-          onAutoDraftThisRound: rounds.isEmpty ? () {} : () => provider.autoDraftRound(_selectedRouletteRound),
+          onAutoDraftAllRounds: rounds.isEmpty
+              ? () {}
+              : () async {
+                  final error = await provider.autoDraftAllRounds();
+                  if (error != null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(error),
+                        backgroundColor: const Color(0xFFD71212),
+                      ),
+                    );
+                  }
+                },
+          onAutoDraftThisRound: rounds.isEmpty
+              ? () {}
+              : () async {
+                  final error = await provider.autoDraftRound(_selectedRouletteRound);
+                  if (error != null && mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(error),
+                        backgroundColor: const Color(0xFFD71212),
+                      ),
+                    );
+                  }
+                },
           onResetThisRound: rounds.isEmpty ? () {} : () => provider.resetRouletteRound(_selectedRouletteRound),
           onResetAllRounds: rounds.isEmpty ? () {} : () => provider.resetRouletteAllRounds(),
         ),
