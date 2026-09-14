@@ -1,5 +1,6 @@
 import 'package:fixtura/widgets/long_section_header.dart';
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import '../providers/tournament_provider.dart';
@@ -65,8 +66,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return PopScope(
       canPop: _currentNavIndex == 0,
       onPopInvokedWithResult: (didPop, result) {
-        if (didPop) return;
-        if (_currentNavIndex != 0) {
+        if (!didPop && _currentNavIndex != 0) {
           setState(() {
             _currentNavIndex = 0;
           });
@@ -75,73 +75,74 @@ class _DashboardScreenState extends State<DashboardScreen> {
       child: Scaffold(
         backgroundColor: const Color(0xFFFFFCFC),
         body: SafeArea(
-        child: Column(
-          children: [
-            // Fixed Top App Bar
-            const MainAppbar(),
+          child: Column(
+            children: [
+              // Fixed Top App Bar
+              const MainAppbar(),
 
-            // Scrollable Middle Content
-            Expanded(
-              child: Consumer<TournamentProvider>(
-                builder: (context, provider, child) {
-                  final activeCount = provider.tournaments
-                      .where((t) => t.status == 'active')
-                      .length;
-                  final finishedCount = provider.tournaments
-                      .where((t) => t.status == 'completed')
-                      .length;
-                  final totalCount = provider.tournaments.length;
+              // Scrollable Middle Content
+              Expanded(
+                child: Consumer<TournamentProvider>(
+                  builder: (context, provider, child) {
+                    final activeCount = provider.tournaments
+                        .where((t) => t.status == 'active')
+                        .length;
+                    final finishedCount = provider.tournaments
+                        .where((t) => t.status == 'completed')
+                        .length;
+                    final totalCount = provider.tournaments.length;
 
-                  if (_currentNavIndex == 1) {
-                    // Tournaments Tab View (Screenshot 2)
-                    return _buildTournamentsTab(
+                    if (_currentNavIndex == 1) {
+                      return _buildTournamentsTab(
+                        context,
+                        provider,
+                        totalCount,
+                        activeCount,
+                        finishedCount,
+                      );
+                    }
+
+                    return _buildHomeTab(
+                      context,
                       provider,
                       totalCount,
                       activeCount,
                       finishedCount,
                     );
-                  }
-
-                  // Default Home View (Screenshot 1)
-                  return _buildHomeTab(
-                    provider,
-                    totalCount,
-                    activeCount,
-                    finishedCount,
-                  );
-                },
+                  },
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
+        ),
+
+        // Fixed Bottom Nav Bar
+        bottomNavigationBar: CustomBottomNavBar(
+          currentIndex: _currentNavIndex,
+          onTap: (index) {
+            if (index == 2) {
+              _navigateToRoulette();
+            } else {
+              setState(() {
+                _currentNavIndex = index;
+              });
+            }
+          },
+          onCreateTap: _navigateToCreate,
         ),
       ),
-
-      // Fixed Bottom Nav Bar
-      bottomNavigationBar: CustomBottomNavBar(
-        currentIndex: _currentNavIndex,
-        onTap: (index) {
-          if (index == 2) {
-            _navigateToRoulette();
-          } else {
-            setState(() {
-              _currentNavIndex = index;
-            });
-          }
-        },
-        onCreateTap: _navigateToCreate,
-      ),
-    ),
     );
   }
 
-  /// Build Tab 0: Home Screen View (Matching Screenshot 1)
+  /// Build Tab 0: Home Screen View
   Widget _buildHomeTab(
+    BuildContext context,
     TournamentProvider provider,
     int totalCount,
     int activeCount,
     int finishedCount,
   ) {
-    // Pick the last active tournament, or the latest available one
+    final l10n = AppLocalizations.of(context);
     final activeTournaments = provider.tournaments
         .where((t) => t.status == 'active')
         .toList();
@@ -151,12 +152,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      // padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          // Section: TOURNAMENTS
           const Gap(12),
-          const LongSectionHeader(title: 'TOURNAMENTS'),
+          LongSectionHeader(title: l10n?.tournaments ?? 'TOURNAMENTS'),
           const Gap(12),
 
           // Stats Cards Row
@@ -165,13 +164,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: StatCard(label: 'Total', value: '$totalCount'),
+                  child: StatCard(label: l10n?.total ?? 'Total', value: '$totalCount'),
                 ),
                 Expanded(
-                  child: StatCard(label: 'Active', value: '$activeCount'),
+                  child: StatCard(label: l10n?.active ?? 'Active', value: '$activeCount'),
                 ),
                 Expanded(
-                  child: StatCard(label: 'Finished', value: '$finishedCount'),
+                  child: StatCard(label: l10n?.finished ?? 'Finished', value: '$finishedCount'),
                 ),
               ],
             ),
@@ -179,32 +178,32 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Gap(24),
 
           // Section: QUICK ACTIONS
-          const LongSectionHeader(title: 'QUICK ACTIONS'),
+          LongSectionHeader(title: l10n?.quickActions ?? 'QUICK ACTIONS'),
           const Gap(12),
 
           // Action Button 1: Create a new tournament
           QuickActionCard(
-            label: 'Create a new tournament',
+            label: l10n?.createNewTournament ?? 'Create a new tournament',
             onTap: _navigateToCreate,
           ),
           const Gap(10),
 
           // Action Button 2: Quick Roulette Spin
           QuickActionCard(
-            label: 'Quick Roulette Spin',
+            label: l10n?.quickRouletteSpin ?? 'Quick Roulette Spin',
             onTap: _navigateToRoulette,
           ),
           const Gap(24),
 
           // Section: LAST ACTIVE TOURNAMENT
           if (lastTournament != null) ...[
-            const LongSectionHeader(title: 'LAST ACTIVE TOURNAMENT'),
+            LongSectionHeader(title: l10n?.lastActiveTournament ?? 'LAST ACTIVE TOURNAMENT'),
             const Gap(12),
             _buildTournamentWidget(lastTournament, provider),
           ] else ...[
-            const LongSectionHeader(title: 'LAST ACTIVE TOURNAMENT'),
+            LongSectionHeader(title: l10n?.lastActiveTournament ?? 'LAST ACTIVE TOURNAMENT'),
             const Gap(12),
-            _buildEmptyState(),
+            _buildEmptyState(context),
           ],
           const Gap(20),
         ],
@@ -212,21 +211,21 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-  /// Build Tab 1: Tournaments List Screen View (Matching Screenshot 2)
+  /// Build Tab 1: Tournaments List Screen View
   Widget _buildTournamentsTab(
+    BuildContext context,
     TournamentProvider provider,
     int totalCount,
     int activeCount,
     int finishedCount,
   ) {
+    final l10n = AppLocalizations.of(context);
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
-      // padding: const EdgeInsets.symmetric(vertical: 16),
       child: Column(
         children: [
-          // Section: TOURNAMENTS
           const Gap(12),
-          const LongSectionHeader(title: 'TOURNAMENTS'),
+          LongSectionHeader(title: l10n?.tournaments ?? 'TOURNAMENTS'),
           const Gap(12),
 
           // Stats Cards Row
@@ -235,13 +234,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
             child: Row(
               children: [
                 Expanded(
-                  child: StatCard(label: 'Total', value: '$totalCount'),
+                  child: StatCard(label: l10n?.total ?? 'Total', value: '$totalCount'),
                 ),
                 Expanded(
-                  child: StatCard(label: 'Active', value: '$activeCount'),
+                  child: StatCard(label: l10n?.active ?? 'Active', value: '$activeCount'),
                 ),
                 Expanded(
-                  child: StatCard(label: 'Finished', value: '$finishedCount'),
+                  child: StatCard(label: l10n?.finished ?? 'Finished', value: '$finishedCount'),
                 ),
               ],
             ),
@@ -249,10 +248,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
           const Gap(12),
           Container(
             width: double.infinity,
-            margin: EdgeInsets.symmetric(horizontal: 20),
+            margin: const EdgeInsets.symmetric(horizontal: 20),
             height: 5,
             decoration: BoxDecoration(
-              color: Color(0xFFF1F1F1),
+              color: const Color(0xFFF1F1F1),
               borderRadius: BorderRadius.circular(6),
             ),
           ),
@@ -260,7 +259,7 @@ class _DashboardScreenState extends State<DashboardScreen> {
 
           // Full Tournaments List
           if (provider.tournaments.isEmpty)
-            _buildEmptyState()
+            _buildEmptyState(context)
           else
             ...provider.tournaments.map(
               (t) => Padding(
@@ -316,10 +315,9 @@ class _DashboardScreenState extends State<DashboardScreen> {
     );
   }
 
-
-
   /// Placeholder when no tournaments exist
-  Widget _buildEmptyState() {
+  Widget _buildEmptyState(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.all(24),
@@ -343,19 +341,19 @@ class _DashboardScreenState extends State<DashboardScreen> {
             color: Colors.black,
           ),
           const Gap(12),
-          const Text(
-            'No Tournaments Yet',
-            style: TextStyle(
+          Text(
+            l10n?.noTournamentsFound ?? 'No Tournaments Yet',
+            style: const TextStyle(
               fontFamily: 'RobotoMono',
               fontSize: 16,
               fontWeight: FontWeight.bold,
             ),
           ),
           const Gap(6),
-          const Text(
-            'Tap the Create button below to set up your first league or bracket!',
+          Text(
+            l10n?.createYourFirst ?? 'Tap the Create button below to set up your first league or bracket!',
             textAlign: TextAlign.center,
-            style: TextStyle(
+            style: const TextStyle(
               fontFamily: 'RobotoMono',
               fontSize: 12,
               color: Colors.black87,

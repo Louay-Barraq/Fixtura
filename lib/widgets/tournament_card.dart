@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import 'progress_bar_section.dart';
 
@@ -26,6 +27,7 @@ class TournamentCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 20),
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
@@ -86,7 +88,7 @@ class TournamentCard extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                hasLastMatch ? 'Your Last Match' : 'Tournament Status',
+                hasLastMatch ? (l10n?.yourLastMatch ?? 'Your Last Match') : (l10n?.tournamentStatus ?? 'Tournament Status'),
                 style: const TextStyle(
                   fontFamily: 'RobotoMono',
                   fontSize: 14,
@@ -185,7 +187,9 @@ class TournamentCard extends StatelessWidget {
                       )
                     : Center(
                         child: Text(
-                          progressValue == 100 ? 'Tournament Completed 🎉' : 'No played matches yet',
+                          progressValue == 100
+                              ? (l10n?.tournamentCompleted ?? 'Tournament Completed 🎉')
+                              : (l10n?.noPlayedMatches ?? 'No played matches yet'),
                           style: TextStyle(
                             fontFamily: 'RobotoMono',
                             fontSize: 13,
