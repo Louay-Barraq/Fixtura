@@ -188,9 +188,26 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                 Positioned(
                   left: 10,
                   top: 10,
-                  child: IconButton(
-                    icon: const Icon(Icons.arrow_back, color: Colors.black),
-                    onPressed: () => Navigator.pop(context),
+                  child: Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      shape: BoxShape.circle,
+                      border: Border.all(color: Colors.black, width: 2),
+                      boxShadow: [
+                        BoxShadow(
+                          offset: const Offset(0, 2),
+                          blurRadius: 4,
+                          spreadRadius: 0,
+                          color: Colors.black.withValues(alpha: 0.25),
+                        ),
+                      ],
+                    ),
+                    child: IconButton(
+                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      onPressed: () => Navigator.pop(context),
+                    ),
                   ),
                 ),
               ],
