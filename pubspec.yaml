@@ -1,5 +1,5 @@
 name: fixtura
-description: "A new Flutter project."
+description: "Manage local tournaments, leagues, brackets and team roulette spins totally offline."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
