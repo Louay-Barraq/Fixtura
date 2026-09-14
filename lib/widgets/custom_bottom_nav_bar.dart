@@ -1,6 +1,8 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
+import 'nav_item.dart';
 
 /// Fixtura's bottom nav bar: four equal buttons in a row — Home,
 /// Tournaments, Create, Roulette. Icons are hand-drawn to match the app's
@@ -23,6 +25,8 @@ class CustomBottomNavBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
     return Container(
       decoration: BoxDecoration(
         color: const Color(0xFFFFFCFC),
@@ -41,27 +45,27 @@ class CustomBottomNavBar extends StatelessWidget {
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              _NavItem(
-                label: 'Home',
+              NavItem(
+                label: l10n?.homeTab ?? 'Home',
                 selected: currentIndex == 0,
                 painterBuilder: (color) => _HouseIconPainter(color),
                 onTap: () => onTap(0),
               ),
-              _NavItem(
-                label: 'Tournaments',
+              NavItem(
+                label: l10n?.tournamentsTab ?? 'Tournaments',
                 selected: currentIndex == 1,
                 painterBuilder: (color) => _BracketIconPainter(color),
                 onTap: () => onTap(1),
               ),
-              _NavItem(
-                label: 'Create',
+              NavItem(
+                label: l10n?.createTab ?? 'Create',
                 selected: false,
                 alwaysFilled: false,
                 painterBuilder: (color) => _PlusIconPainter(color),
                 onTap: onCreateTap,
               ),
-              _NavItem(
-                label: 'Roulette',
+              NavItem(
+                label: l10n?.rouletteTab ?? 'Roulette',
                 selected: currentIndex == 2,
                 painterBuilder: (color) => _WheelIconPainter(color),
                 onTap: () => onTap(2),
@@ -69,73 +73,6 @@ class CustomBottomNavBar extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _NavItem extends StatelessWidget {
-  const _NavItem({
-    required this.label,
-    required this.selected,
-    required this.painterBuilder,
-    required this.onTap,
-    this.alwaysFilled = false,
-  });
-
-  final String label;
-  final bool selected;
-  final bool alwaysFilled;
-  final CustomPainter Function(Color color) painterBuilder;
-  final VoidCallback onTap;
-
-  @override
-  Widget build(BuildContext context) {
-    final filled = selected || alwaysFilled;
-    // final circleColor = filled ? Colors.black : Colors.white;
-    final circleColor = filled ? Color(0xFFD71212) : Colors.white;
-    // final iconColor = filled ? Colors.white : Colors.black;
-    final iconColor = filled ? Colors.white : Color(0xFFD71212);
-    final labelColor = selected ? const Color(0xFFD30D15) : Colors.black;
-
-    return GestureDetector(
-      onTap: onTap,
-      behavior: HitTestBehavior.opaque,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Container(
-            width: 44,
-            height: 44,
-            decoration: BoxDecoration(
-              color: circleColor,
-              shape: BoxShape.circle,
-              border: Border.all(color: Colors.black, width: 2),
-              boxShadow: [
-                BoxShadow(
-                  offset: const Offset(0, 2),
-                  blurRadius: 4,
-                  spreadRadius: 0,
-                  color: Colors.black.withValues(alpha: 0.25),
-                ),
-              ],
-            ),
-            child: CustomPaint(
-              size: const Size(44, 44),
-              painter: painterBuilder(iconColor),
-            ),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            label,
-            style: TextStyle(
-              fontFamily: 'RobotoMono',
-              fontSize: 11,
-              color: labelColor,
-              fontWeight: selected ? FontWeight.w600 : FontWeight.w400,
-            ),
-          ),
-        ],
       ),
     );
   }
