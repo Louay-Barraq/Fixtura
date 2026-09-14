@@ -176,6 +176,16 @@ class DatabaseHelper {
     );
   }
 
+  Future<void> clearAllData() async {
+    final db = await instance.database;
+    await db.transaction((txn) async {
+      await txn.delete('roulette_assignments');
+      await txn.delete('matches');
+      await txn.delete('teams');
+      await txn.delete('tournaments');
+    });
+  }
+
   // --- Team Operations ---
 
   Future<int> insertTeam(Team team, [DatabaseExecutor? executor]) async {

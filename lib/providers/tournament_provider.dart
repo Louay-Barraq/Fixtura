@@ -782,6 +782,27 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
+  // Clear all tournaments and reset state
+  Future<void> clearAllTournaments() async {
+    _isLoading = true;
+    notifyListeners();
+    try {
+      await _dbHelper.clearAllData();
+      _activeTournament = null;
+      _activeTeams = [];
+      _activeMatches = [];
+      _activeRouletteAssignments = {};
+      _tournaments = [];
+      _tournamentMatches = {};
+      _tournamentTeams = {};
+    } catch (e) {
+      debugPrint("Error clearing all tournaments: $e");
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
   // Calculate Standings Table on the fly
   List<Standing> calculateStandings() {
     if (_activeTournament == null || _activeTournament!.type != TournamentType.roundRobin) {
