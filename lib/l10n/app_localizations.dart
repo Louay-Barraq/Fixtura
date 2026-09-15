@@ -539,6 +539,132 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Round {num}'**
   String round(int num);
+
+  /// No description provided for @createTournament.
+  ///
+  /// In en, this message translates to:
+  /// **'CREATE TOURNAMENT'**
+  String get createTournament;
+
+  /// No description provided for @pleaseEnterTournamentName.
+  ///
+  /// In en, this message translates to:
+  /// **'Please enter a tournament name'**
+  String get pleaseEnterTournamentName;
+
+  /// No description provided for @atLeastTwoPlayersRequired.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least 2 players in MANAGE PLAYERS to create a tournament.'**
+  String get atLeastTwoPlayersRequired;
+
+  /// No description provided for @teamPoolEmptyError.
+  ///
+  /// In en, this message translates to:
+  /// **'The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.'**
+  String get teamPoolEmptyError;
+
+  /// No description provided for @tournamentCreatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament created successfully!'**
+  String get tournamentCreatedSuccess;
+
+  /// No description provided for @failedToCreateTournament.
+  ///
+  /// In en, this message translates to:
+  /// **'Failed to create tournament.'**
+  String get failedToCreateTournament;
+
+  /// No description provided for @addOptions.
+  ///
+  /// In en, this message translates to:
+  /// **'ADD OPTIONS'**
+  String get addOptions;
+
+  /// No description provided for @rouletteWheel.
+  ///
+  /// In en, this message translates to:
+  /// **'ROULETTE WHEEL'**
+  String get rouletteWheel;
+
+  /// No description provided for @wheelIsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Wheel is Empty'**
+  String get wheelIsEmpty;
+
+  /// No description provided for @addOptionsAbove.
+  ///
+  /// In en, this message translates to:
+  /// **'Add options above to generate your custom wheel!'**
+  String get addOptionsAbove;
+
+  /// No description provided for @next.
+  ///
+  /// In en, this message translates to:
+  /// **'NEXT'**
+  String get next;
+
+  /// No description provided for @getStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'GET STARTED'**
+  String get getStarted;
+
+  /// No description provided for @skip.
+  ///
+  /// In en, this message translates to:
+  /// **'SKIP'**
+  String get skip;
+
+  /// No description provided for @singleLeg.
+  ///
+  /// In en, this message translates to:
+  /// **'1 LEG (SINGLE)'**
+  String get singleLeg;
+
+  /// No description provided for @doubleLeg.
+  ///
+  /// In en, this message translates to:
+  /// **'2 LEGS (DOUBLE)'**
+  String get doubleLeg;
+
+  /// No description provided for @editTournament.
+  ///
+  /// In en, this message translates to:
+  /// **'EDIT TOURNAMENT'**
+  String get editTournament;
+
+  /// No description provided for @editPlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'EDIT PLAYERS'**
+  String get editPlayers;
+
+  /// No description provided for @playerNames.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAYER NAMES'**
+  String get playerNames;
+
+  /// No description provided for @editPlayerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit player name'**
+  String get editPlayerHint;
+
+  /// No description provided for @tournamentUpdatedSuccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament updated successfully!'**
+  String get tournamentUpdatedSuccess;
+
+  /// No description provided for @delete.
+  ///
+  /// In en, this message translates to:
+  /// **'DELETE'**
+  String get delete;
 }
 
 class _AppLocalizationsDelegate

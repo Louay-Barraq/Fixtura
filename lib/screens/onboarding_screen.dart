@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import 'dashboard_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -82,6 +83,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final double progress = (_currentPage + 1) / _totalSteps;
     final bool isLastPage = _currentPage == _totalSteps - 1;
 
@@ -151,9 +153,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                             ),
                           ],
                         ),
-                        child: const Text(
-                          'SKIP',
-                          style: TextStyle(
+                        child: Text(
+                          l10n.skip,
+                          style: const TextStyle(
                             fontFamily: 'RobotoMono',
                             fontSize: 12,
                             fontWeight: FontWeight.bold,
@@ -243,7 +245,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
-                              isLastPage ? 'GET STARTED' : 'NEXT',
+                              isLastPage ? l10n.getStarted : l10n.next,
                               style: const TextStyle(
                                 fontFamily: 'BebasNeue',
                                 fontSize: 20,
@@ -252,10 +254,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                               ),
                             ),
                             const Gap(8),
-                            Icon(
-                              isLastPage ? Icons.rocket_launch_rounded : Icons.arrow_forward_rounded,
-                              color: Colors.white,
-                              size: 18,
+                            Transform.flip(
+                              flipX: Directionality.of(context) == TextDirection.rtl && !isLastPage,
+                              child: Icon(
+                                isLastPage ? Icons.rocket_launch_rounded : Icons.arrow_forward_rounded,
+                                color: Colors.white,
+                                size: 18,
+                              ),
                             ),
                           ],
                         ),

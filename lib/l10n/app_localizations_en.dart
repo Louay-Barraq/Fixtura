@@ -232,4 +232,70 @@ class AppLocalizationsEn extends AppLocalizations {
   String round(int num) {
     return 'Round $num';
   }
+
+  @override
+  String get createTournament => 'CREATE TOURNAMENT';
+
+  @override
+  String get pleaseEnterTournamentName => 'Please enter a tournament name';
+
+  @override
+  String get atLeastTwoPlayersRequired =>
+      'You need at least 2 players in MANAGE PLAYERS to create a tournament.';
+
+  @override
+  String get teamPoolEmptyError =>
+      'The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.';
+
+  @override
+  String get tournamentCreatedSuccess => 'Tournament created successfully!';
+
+  @override
+  String get failedToCreateTournament => 'Failed to create tournament.';
+
+  @override
+  String get addOptions => 'ADD OPTIONS';
+
+  @override
+  String get rouletteWheel => 'ROULETTE WHEEL';
+
+  @override
+  String get wheelIsEmpty => 'Wheel is Empty';
+
+  @override
+  String get addOptionsAbove =>
+      'Add options above to generate your custom wheel!';
+
+  @override
+  String get next => 'NEXT';
+
+  @override
+  String get getStarted => 'GET STARTED';
+
+  @override
+  String get skip => 'SKIP';
+
+  @override
+  String get singleLeg => '1 LEG (SINGLE)';
+
+  @override
+  String get doubleLeg => '2 LEGS (DOUBLE)';
+
+  @override
+  String get editTournament => 'EDIT TOURNAMENT';
+
+  @override
+  String get editPlayers => 'EDIT PLAYERS';
+
+  @override
+  String get playerNames => 'PLAYER NAMES';
+
+  @override
+  String get editPlayerHint => 'Edit player name';
+
+  @override
+  String get tournamentUpdatedSuccess => 'Tournament updated successfully!';
+
+  @override
+  String get delete => 'DELETE';
 }

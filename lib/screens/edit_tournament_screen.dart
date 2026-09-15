@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '../models/tournament.dart';
 import '../providers/tournament_provider.dart';
 import '../widgets/main_appbar.dart';
@@ -70,12 +71,13 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
   }
 
   Future<void> _saveSettings() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Please enter a tournament name'),
-          backgroundColor: Color(0xFFD71212),
+        SnackBar(
+          content: Text(l10n.pleaseEnterTournamentName),
+          backgroundColor: const Color(0xFFD71212),
         ),
       );
       return;
@@ -83,9 +85,9 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
 
     if (_useRoulette && _roulettePool.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Roulette pool cannot be empty when roulette is enabled.'),
-          backgroundColor: Color(0xFFD71212),
+        SnackBar(
+          content: Text(l10n.teamPoolEmptyError),
+          backgroundColor: const Color(0xFFD71212),
         ),
       );
       return;
@@ -117,8 +119,8 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
 
     if (success) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tournament updated successfully!'),
+        SnackBar(
+          content: Text(l10n.tournamentUpdatedSuccess),
           backgroundColor: Colors.black,
         ),
       );
@@ -127,20 +129,21 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
   }
 
   void _deleteTournament() {
+    final l10n = AppLocalizations.of(context)!;
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
         backgroundColor: Colors.white,
-        title: const Text(
-          'DELETE TOURNAMENT',
-          style: TextStyle(
+        title: Text(
+          l10n.deleteTournament,
+          style: const TextStyle(
             fontFamily: 'BebasNeue',
             fontSize: 22,
             color: Colors.black,
           ),
         ),
         content: Text(
-          'Are you sure you want to delete "${widget.tournament.name}"? This action cannot be undone.',
+          l10n.deleteTournamentConfirm(widget.tournament.name),
           style: const TextStyle(
             fontFamily: 'RobotoMono',
             fontSize: 13,
@@ -150,9 +153,9 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx),
-            child: const Text(
-              'CANCEL',
-              style: TextStyle(
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(
                 fontFamily: 'RobotoMono',
                 color: Colors.black54,
                 fontWeight: FontWeight.bold,
@@ -173,9 +176,9 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                 }
               }
             },
-            child: const Text(
-              'DELETE',
-              style: TextStyle(
+            child: Text(
+              l10n.delete,
+              style: const TextStyle(
                 fontFamily: 'RobotoMono',
                 color: Color(0xFFD71212),
                 fontWeight: FontWeight.bold,
@@ -189,6 +192,7 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final provider = Provider.of<TournamentProvider>(context);
     final players = provider.activeTeams;
     final isRoundRobin = widget.tournament.type == TournamentType.roundRobin;
@@ -227,17 +231,17 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                   child: Column(
                     children: [
                       // Section 1: TOURNAMENT NAME
-                      const ShortSectionHeader(title: 'TOURNAMENT NAME'),
+                      ShortSectionHeader(title: l10n.tournamentName),
                       const Gap(12),
                       CustomTextField(
                         controller: _nameController,
-                        text: 'Enter tournament name...',
+                        text: l10n.tournamentNameHint,
                       ),
                       const Gap(24),
 
                       // Section 2: EDIT PLAYERS NAMES
                       if (players.isNotEmpty) ...[
-                        const ShortSectionHeader(title: 'PARTICIPANTS'),
+                        ShortSectionHeader(title: l10n.editPlayers),
                         const Gap(12),
                         Padding(
                           padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -285,9 +289,10 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                                             fontWeight: FontWeight.w600,
                                             color: Colors.black,
                                           ),
-                                          decoration: const InputDecoration(
+                                          decoration: InputDecoration(
                                             border: InputBorder.none,
                                             isDense: true,
+                                            hintText: l10n.editPlayerHint,
                                           ),
                                         ),
                                       ),
@@ -303,7 +308,7 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
 
                       // Section 3: POINTS RULES (League only)
                       if (isRoundRobin) ...[
-                        const ShortSectionHeader(title: 'POINTS SETTINGS'),
+                        ShortSectionHeader(title: l10n.pointsSettings),
                         const Gap(12),
                         PointsSettingsCard(
                           initialWin: _pointsWin,
@@ -321,11 +326,11 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                       ],
 
                       // Section 4: TEAM ROULETTE SETTINGS
-                      const ShortSectionHeader(title: 'TEAM ROULETTE'),
+                      ShortSectionHeader(title: l10n.teamRoulette),
                       const Gap(12),
                       ToggleSettingTile(
-                        title: 'Enable Team Roulette',
-                        subtitle: 'Assign random clubs to players',
+                        title: l10n.enableTeamRoulette,
+                        subtitle: l10n.enableRouletteSubtitle,
                         initialValue: _useRoulette,
                         onChanged: (val) {
                           setState(() => _useRoulette = val);
@@ -340,8 +345,8 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                           children: [
                             const Gap(12),
                             ToggleSettingTile(
-                              title: 'Unique Teams Only',
-                              subtitle: 'Prevent duplicate team assignments',
+                              title: l10n.uniqueTeamsOnly,
+                              subtitle: l10n.uniqueTeamsSubtitle,
                               initialValue: _rouletteUnique,
                               onChanged: (val) {
                                 setState(() => _rouletteUnique = val);
@@ -349,15 +354,15 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
                             ),
                             const Gap(12),
                             ToggleSettingTile(
-                              title: 'Distinct Teams Across Rounds',
-                              subtitle: 'Prevent getting the same team twice',
+                              title: l10n.distinctTeamsAcrossRounds,
+                              subtitle: l10n.distinctTeamsSubtitle,
                               initialValue: _rouletteRoundUnique,
                               onChanged: (val) {
                                 setState(() => _rouletteRoundUnique = val);
                               },
                             ),
                             const Gap(12),
-                            const ShortSectionHeader(title: 'ROULETTE POOL'),
+                            ShortSectionHeader(title: l10n.roulettePool),
                             const Gap(12),
                             DynamicInput(
                               tagType: 'Teams',
@@ -378,7 +383,7 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
 
                       // Save Button
                       CreateTournamentButton(
-                        text: 'SAVE CHANGES',
+                        text: l10n.saveChanges,
                         isLoading: _isSaving,
                         onPressed: _isSaving || _isDeleting ? null : _saveSettings,
                       ),

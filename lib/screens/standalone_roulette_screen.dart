@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/short_section_header.dart';
 import '../widgets/custom_roulette_wheel.dart';
@@ -17,6 +18,8 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCFC),
       body: SafeArea(
@@ -49,7 +52,7 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
                 child: Column(
                   children: [
                     // Section 1: ADD OPTIONS (Dynamic Input on Top of Wheel)
-                    const ShortSectionHeader(title: 'ADD OPTIONS'),
+                    ShortSectionHeader(title: l10n.addOptions),
                     const Gap(12),
                     DynamicInput(
                       tagType: 'Options',
@@ -64,7 +67,7 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
                     const Gap(24),
 
                     // Section 2: ROULETTE WHEEL
-                    const ShortSectionHeader(title: 'ROULETTE WHEEL'),
+                    ShortSectionHeader(title: l10n.rouletteWheel),
                     const Gap(16),
 
                     if (_options.isEmpty) ...[
@@ -82,24 +85,24 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
                             ),
                           ],
                         ),
-                        child: const Column(
+                        child: Column(
                           children: [
-                            Icon(Icons.pie_chart_outline, size: 48, color: Colors.black),
-                            Gap(12),
+                            const Icon(Icons.pie_chart_outline, size: 48, color: Colors.black),
+                            const Gap(12),
                             Text(
-                              'Wheel is Empty',
-                              style: TextStyle(
+                              l10n.wheelIsEmpty,
+                              style: const TextStyle(
                                 fontFamily: 'RobotoMono',
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
                                 color: Colors.black,
                               ),
                             ),
-                            Gap(6),
+                            const Gap(6),
                             Text(
-                              'Add options above to generate your custom wheel!',
+                              l10n.addOptionsAbove,
                               textAlign: TextAlign.center,
-                              style: TextStyle(
+                              style: const TextStyle(
                                 fontFamily: 'RobotoMono',
                                 fontSize: 12,
                                 color: Colors.grey,

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '../providers/tournament_provider.dart';
 import '../models/tournament.dart';
 import '../widgets/main_appbar.dart';
@@ -61,15 +62,16 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   }
 
   Future<void> _submitForm() async {
+    final l10n = AppLocalizations.of(context)!;
     final name = _nameController.text.trim();
     if (name.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Please enter a tournament name',
-            style: TextStyle(color: Colors.white),
+            l10n.pleaseEnterTournamentName,
+            style: const TextStyle(color: Colors.white),
           ),
-          backgroundColor: Color(0xFFD71212),
+          backgroundColor: const Color(0xFFD71212),
         ),
       );
       return;
@@ -77,12 +79,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
 
     if (_playerNames.length < 2) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'You need at least 2 players in MANAGE PLAYERS to create a tournament.',
-            style: TextStyle(color: Colors.white),
+            l10n.atLeastTwoPlayersRequired,
+            style: const TextStyle(color: Colors.white),
           ),
-          backgroundColor: Color(0xFFD71212),
+          backgroundColor: const Color(0xFFD71212),
         ),
       );
       return;
@@ -91,12 +93,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     if (_useRoulette) {
       if (_teamNames.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
+          SnackBar(
             content: Text(
-              'The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.',
-              style: TextStyle(color: Colors.white),
+              l10n.teamPoolEmptyError,
+              style: const TextStyle(color: Colors.white),
             ),
-            backgroundColor: Color(0xFFD71212),
+            backgroundColor: const Color(0xFFD71212),
           ),
         );
         return;
@@ -106,7 +108,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           SnackBar(
             content: Text(
               'You need at least ${_estimatedRoundCount()} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have ${_teamNames.length}).',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
           ),
@@ -118,7 +120,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
           SnackBar(
             content: Text(
               'You need at least ${_playerNames.length} teams in MANAGE TEAMS to ensure unique assignments per player (you have ${_teamNames.length}).',
-              style: TextStyle(color: Colors.white),
+              style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
           ),
@@ -149,8 +151,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
 
     if (tournamentId != null && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Tournament created successfully!', style: TextStyle(color: Colors.white),),
+        SnackBar(
+          content: Text(l10n.tournamentCreatedSuccess, style: const TextStyle(color: Colors.white)),
           backgroundColor: Colors.black,
         ),
       );
@@ -163,12 +165,12 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
       );
     } else if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
+        SnackBar(
           content: Text(
-            'Failed to create tournament.',
-            style: TextStyle(color: Colors.white),
+            l10n.failedToCreateTournament,
+            style: const TextStyle(color: Colors.white),
           ),
-          backgroundColor: Color(0xFFD71212),
+          backgroundColor: const Color(0xFFD71212),
         ),
       );
     }
@@ -176,6 +178,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCFC),
       body: SafeArea(
@@ -227,23 +231,23 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                   child: Column(
                     children: [
                       // Section 1: TOURNAMENT NAME
-                      const ShortSectionHeader(title: 'TOURNAMENT NAME'),
+                      ShortSectionHeader(title: l10n.tournamentName),
                       const Gap(12),
                       CustomTextField(
                         controller: _nameController,
-                        text: 'Enter tournament name...',
+                        text: l10n.tournamentNameHint,
                       ),
                       const Gap(24),
 
                       // Section 2: FORMAT
-                      const ShortSectionHeader(title: 'FORMAT'),
+                      ShortSectionHeader(title: l10n.format),
                       const Gap(12),
                       Row(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
                           FormatOptionCard(
-                            title: 'League',
-                            subtitle: 'Round-Robin',
+                            title: l10n.league,
+                            subtitle: l10n.roundRobin,
                             icon: Icons.leaderboard_rounded,
                             isSelected: _type == TournamentType.roundRobin,
                             onTap: () => setState(
@@ -252,8 +256,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           ),
                           const Gap(16),
                           FormatOptionCard(
-                            title: 'BRACKETS',
-                            subtitle: 'Knockout',
+                            title: l10n.brackets,
+                            subtitle: l10n.knockout,
                             customPainter: (color) => _BracketFormatIconPainter(color),
                             isSelected: _type == TournamentType.knockout,
                             onTap: () =>
@@ -271,22 +275,22 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             : CrossFadeState.showSecond,
                         firstChild: Column(
                           children: [
-                            const ShortSectionHeader(title: 'LEAGUE SETTINGS'),
+                            ShortSectionHeader(title: l10n.leagueSettings),
                             const Gap(12),
                             DropdownTile(
-                              title: 'Legs',
-                              subtitle: 'Number of matches per pair',
+                              title: l10n.legs,
+                              subtitle: l10n.legsSubtitle,
                               initialValue: _legs == 1
-                                  ? '1 LEG (SINGLE)'
-                                  : '2 LEGS (DOUBLE)',
-                              options: const [
-                                '1 LEG (SINGLE)',
-                                '2 LEGS (DOUBLE)',
+                                  ? l10n.singleLeg
+                                  : l10n.doubleLeg,
+                              options: [
+                                l10n.singleLeg,
+                                l10n.doubleLeg,
                               ],
                               onChanged: (val) {
                                 if (val != null) {
                                   setState(() {
-                                    _legs = val.contains('1') ? 1 : 2;
+                                    _legs = (val == l10n.singleLeg) ? 1 : 2;
                                   });
                                 }
                               },
@@ -311,11 +315,11 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       ),
 
                       // Section 4: TEAM ROULETTE
-                      const ShortSectionHeader(title: 'TEAM ROULETTE'),
+                      ShortSectionHeader(title: l10n.teamRoulette),
                       const Gap(12),
                       ToggleSettingTile(
-                        title: 'Enable Team Roulette',
-                        subtitle: 'Assign random clubs to players',
+                        title: l10n.enableTeamRoulette,
+                        subtitle: l10n.enableRouletteSubtitle,
                         initialValue: _useRoulette,
                         onChanged: (val) {
                           setState(() => _useRoulette = val);
@@ -330,8 +334,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                           children: [
                             const Gap(12),
                             ToggleSettingTile(
-                              title: 'Unique Teams Only',
-                              subtitle: 'Prevent duplicate team assignments',
+                              title: l10n.uniqueTeamsOnly,
+                              subtitle: l10n.uniqueTeamsSubtitle,
                               initialValue: _rouletteUnique,
                               onChanged: (val) {
                                 setState(() => _rouletteUnique = val);
@@ -339,8 +343,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             ),
                             const Gap(12),
                             ToggleSettingTile(
-                              title: 'Distinct Teams Across Rounds',
-                              subtitle: 'Prevent getting the same team twice',
+                              title: l10n.distinctTeamsAcrossRounds,
+                              subtitle: l10n.distinctTeamsSubtitle,
                               initialValue: _rouletteRoundUnique,
                               onChanged: (val) {
                                 setState(() => _rouletteRoundUnique = val);
@@ -354,7 +358,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(12),
 
                       // Section 5: MANAGE PLAYERS
-                      const ShortSectionHeader(title: 'MANAGE PLAYERS'),
+                      ShortSectionHeader(title: l10n.managePlayers),
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Players',
@@ -368,7 +372,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(24),
 
                       // Section 6: MANAGE TEAMS
-                      const ShortSectionHeader(title: 'MANAGE TEAMS'),
+                      ShortSectionHeader(title: l10n.manageTeams),
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Teams',

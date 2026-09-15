@@ -86,5 +86,26 @@
         "type": "int"
       }
     }
-  }
+  },
+  "createTournament": "CREATE TOURNAMENT",
+  "pleaseEnterTournamentName": "Please enter a tournament name",
+  "atLeastTwoPlayersRequired": "You need at least 2 players in MANAGE PLAYERS to create a tournament.",
+  "teamPoolEmptyError": "The team pool (MANAGE TEAMS) cannot be empty when Team Roulette is enabled.",
+  "tournamentCreatedSuccess": "Tournament created successfully!",
+  "failedToCreateTournament": "Failed to create tournament.",
+  "addOptions": "ADD OPTIONS",
+  "rouletteWheel": "ROULETTE WHEEL",
+  "wheelIsEmpty": "Wheel is Empty",
+  "addOptionsAbove": "Add options above to generate your custom wheel!",
+  "next": "NEXT",
+  "getStarted": "GET STARTED",
+  "skip": "SKIP",
+  "singleLeg": "1 LEG (SINGLE)",
+  "doubleLeg": "2 LEGS (DOUBLE)",
+  "editTournament": "EDIT TOURNAMENT",
+  "editPlayers": "EDIT PLAYERS",
+  "playerNames": "PLAYER NAMES",
+  "editPlayerHint": "Edit player name",
+  "tournamentUpdatedSuccess": "Tournament updated successfully!",
+  "delete": "DELETE"
 }

@@ -237,4 +237,70 @@ class AppLocalizationsFr extends AppLocalizations {
   String round(int num) {
     return 'Tour $num';
   }
+
+  @override
+  String get createTournament => 'CRÉER LE TOURNOI';
+
+  @override
+  String get pleaseEnterTournamentName => 'Veuillez entrer un nom de tournoi';
+
+  @override
+  String get atLeastTwoPlayersRequired =>
+      'Vous devez ajouter au moins 2 joueurs dans GÉRER LES JOUEURS.';
+
+  @override
+  String get teamPoolEmptyError =>
+      'La liste des équipes ne peut pas être vide lorsque la roulette est activée.';
+
+  @override
+  String get tournamentCreatedSuccess => 'Tournoi créé avec succès !';
+
+  @override
+  String get failedToCreateTournament => 'Échec de la création du tournoi.';
+
+  @override
+  String get addOptions => 'AJOUTER DES OPTIONS';
+
+  @override
+  String get rouletteWheel => 'ROULETTE';
+
+  @override
+  String get wheelIsEmpty => 'La roulette est vide';
+
+  @override
+  String get addOptionsAbove =>
+      'Ajoutez des options ci-dessus pour générer votre roue personnalisée !';
+
+  @override
+  String get next => 'SUIVANT';
+
+  @override
+  String get getStarted => 'COMMENCER';
+
+  @override
+  String get skip => 'PASSER';
+
+  @override
+  String get singleLeg => '1 MATCH (ALLER)';
+
+  @override
+  String get doubleLeg => '2 MATCHS (ALLER/RETOUR)';
+
+  @override
+  String get editTournament => 'MODIFIER LE TOURNOI';
+
+  @override
+  String get editPlayers => 'MODIFIER LES JOUEURS';
+
+  @override
+  String get playerNames => 'NOMS DES JOUEURS';
+
+  @override
+  String get editPlayerHint => 'Nom du joueur';
+
+  @override
+  String get tournamentUpdatedSuccess => 'Tournoi mis à jour avec succès !';
+
+  @override
+  String get delete => 'SUPPRIMER';
 }

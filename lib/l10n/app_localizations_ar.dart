@@ -232,4 +232,70 @@ class AppLocalizationsAr extends AppLocalizations {
   String round(int num) {
     return 'الجولة $num';
   }
+
+  @override
+  String get createTournament => 'إنشاء البطولة';
+
+  @override
+  String get pleaseEnterTournamentName => 'يرجى إدخال اسم البطولة';
+
+  @override
+  String get atLeastTwoPlayersRequired =>
+      'يجب إضافة لاعبَين اثنين على الأقل في قائمة إدارة اللاعبين.';
+
+  @override
+  String get teamPoolEmptyError =>
+      'لا يمكن أن تكون قائمة الفرق فارغة عند تفعيل القرعة.';
+
+  @override
+  String get tournamentCreatedSuccess => 'تم إنشاء البطولة بنجاح!';
+
+  @override
+  String get failedToCreateTournament => 'فشل إنشاء البطولة.';
+
+  @override
+  String get addOptions => 'إضافة خيارات';
+
+  @override
+  String get rouletteWheel => 'عجلة القرعة';
+
+  @override
+  String get wheelIsEmpty => 'العجلة فارغة';
+
+  @override
+  String get addOptionsAbove =>
+      'أضف خيارات أعلاه لإنشاء عجلة القرعة الخاصة بك!';
+
+  @override
+  String get next => 'التالي';
+
+  @override
+  String get getStarted => 'ابدأ الآن';
+
+  @override
+  String get skip => 'تخطي';
+
+  @override
+  String get singleLeg => 'مواجهة واحدة (مباراة)';
+
+  @override
+  String get doubleLeg => 'مواجهتان (ذهاب وإياب)';
+
+  @override
+  String get editTournament => 'تعديل البطولة';
+
+  @override
+  String get editPlayers => 'تعديل اللاعبين';
+
+  @override
+  String get playerNames => 'أسماء اللاعبين';
+
+  @override
+  String get editPlayerHint => 'تعديل اسم اللاعب';
+
+  @override
+  String get tournamentUpdatedSuccess => 'تم تحديث البطولة بنجاح!';
+
+  @override
+  String get delete => 'حذف';
 }

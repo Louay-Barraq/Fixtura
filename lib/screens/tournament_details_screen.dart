@@ -116,19 +116,24 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                       tournamentName: tournament.name,
                       progressValue: progress,
                     ),
-                    Positioned(
-                      left: 0,
+                    Positioned.directional(
+                      textDirection: Directionality.of(context),
+                      start: 0,
                       top: 10,
                       child: IconButton(
-                        icon: const Icon(Icons.arrow_back, color: Colors.black),
+                        icon: Transform.flip(
+                          flipX: Directionality.of(context) == TextDirection.rtl,
+                          child: const Icon(Icons.arrow_back, color: Colors.black),
+                        ),
                         onPressed: () {
                           provider.loadAllTournaments();
                           Navigator.pop(context);
                         },
                       ),
                     ),
-                    Positioned(
-                      right: 10,
+                    Positioned.directional(
+                      textDirection: Directionality.of(context),
+                      end: 10,
                       top: 10,
                       child: IconButton(
                         icon: const Icon(Icons.tune_rounded, color: Colors.black),
