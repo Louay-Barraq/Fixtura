@@ -43,10 +43,13 @@ class QuickActionCard extends StatelessWidget {
                   color: Colors.black,
                 ),
               ),
-              const Icon(
-                Icons.arrow_circle_right_outlined,
-                size: 24,
-                color: Colors.black,
+              Transform.flip(
+                flipX: Directionality.of(context) == TextDirection.rtl,
+                child: const Icon(
+                  Icons.arrow_circle_right_outlined,
+                  size: 24,
+                  color: Colors.black,
+                ),
               ),
             ],
           ),

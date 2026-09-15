@@ -153,6 +153,7 @@ class SettingsScreen extends StatelessWidget {
                     ShortSectionHeader(title: l10n.guideAndTutorial),
                     const Gap(12),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.menu_book_rounded,
                       title: l10n.viewAppTutorial,
                       subtitle: l10n.replayOnboarding,
@@ -171,6 +172,7 @@ class SettingsScreen extends StatelessWidget {
                     ShortSectionHeader(title: l10n.aboutAndSupport),
                     const Gap(12),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.privacy_tip_outlined,
                       title: l10n.privacyPolicy,
                       subtitle: l10n.privacyPolicySubtitle,
@@ -178,6 +180,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const Gap(10),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.mail_outline_rounded,
                       title: l10n.contactDeveloper,
                       subtitle: l10n.contactDeveloperSubtitle,
@@ -185,6 +188,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const Gap(10),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.star_border_rounded,
                       title: l10n.rateFixtura,
                       subtitle: l10n.rateFixturaSubtitle,
@@ -192,6 +196,7 @@ class SettingsScreen extends StatelessWidget {
                     ),
                     const Gap(10),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.share_outlined,
                       title: l10n.shareWithFriends,
                       subtitle: l10n.shareSubtitle,
@@ -203,6 +208,7 @@ class SettingsScreen extends StatelessWidget {
                     ShortSectionHeader(title: l10n.dangerZone),
                     const Gap(12),
                     _buildSettingsTile(
+                      context,
                       icon: Icons.delete_forever_rounded,
                       title: l10n.clearAllTournaments,
                       subtitle: l10n.clearAllSubtitle,
@@ -347,7 +353,8 @@ class SettingsScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildSettingsTile({
+  Widget _buildSettingsTile(
+    BuildContext context, {
     required IconData icon,
     required String title,
     required String subtitle,
@@ -416,10 +423,13 @@ class SettingsScreen extends StatelessWidget {
                     ],
                   ),
                 ),
-                const Icon(
-                  Icons.arrow_forward_ios_rounded,
-                  size: 14,
-                  color: Colors.black45,
+                Transform.flip(
+                  flipX: Directionality.of(context) == TextDirection.rtl,
+                  child: const Icon(
+                    Icons.arrow_forward_ios_rounded,
+                    size: 14,
+                    color: Colors.black45,
+                  ),
                 ),
               ],
             ),

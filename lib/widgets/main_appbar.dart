@@ -61,9 +61,10 @@ class MainAppbar extends StatelessWidget implements PreferredSizeWidget {
               ],
             ),
             if (showSettingsButton)
-              Positioned(
+              Positioned.directional(
+                textDirection: Directionality.of(context),
                 top: 10,
-                right: 10,
+                end: 10,
                 child: GestureDetector(
                   onTap: () {
                     Navigator.push(

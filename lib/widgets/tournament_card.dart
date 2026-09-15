@@ -222,10 +222,10 @@ class TournamentCard extends StatelessWidget {
                     ),
                   ],
                 ),
-                child: const Row(
+                child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Text(
+                    const Text(
                       'Open Bracket',
                       style: TextStyle(
                         fontFamily: 'RobotoMono',
@@ -234,11 +234,14 @@ class TournamentCard extends StatelessWidget {
                         fontSize: 12,
                       ),
                     ),
-                    Gap(12),
-                    Icon(
-                      Icons.arrow_circle_right_outlined,
-                      size: 20,
-                      color: Colors.white,
+                    const Gap(12),
+                    Transform.flip(
+                      flipX: Directionality.of(context) == TextDirection.rtl,
+                      child: const Icon(
+                        Icons.arrow_circle_right_outlined,
+                        size: 20,
+                        color: Colors.white,
+                      ),
                     ),
                   ],
                 ),
