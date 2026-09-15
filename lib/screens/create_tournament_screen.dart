@@ -185,8 +185,9 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
             Stack(
               children: [
                 const MainAppbar(),
-                Positioned(
-                  left: 10,
+                Positioned.directional(
+                  textDirection: Directionality.of(context),
+                  start: 10,
                   top: 10,
                   child: Container(
                     width: 40,
@@ -205,7 +206,10 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       ],
                     ),
                     child: IconButton(
-                      icon: const Icon(Icons.arrow_back, color: Colors.black),
+                      icon: Transform.flip(
+                        flipX: Directionality.of(context) == TextDirection.rtl,
+                        child: const Icon(Icons.arrow_back, color: Colors.black),
+                      ),
                       onPressed: () => Navigator.pop(context),
                     ),
                   ),
