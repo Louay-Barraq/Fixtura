@@ -225,9 +225,9 @@ class _CustomCustomRouletteWheelState extends State<CustomRouletteWheel>
                         width: 70,
                         height: 70,
                         decoration: BoxDecoration(
-                          color: const Color(0xFFD30D15),
+                          color: Colors.white,
                           shape: BoxShape.circle,
-                          // border: Border.all(color: Colors.white, width: 3),
+                          border: Border.all(color: Colors.black, width: 2),
                           boxShadow: [
                             BoxShadow(
                               offset: const Offset(0, 0),
@@ -243,7 +243,7 @@ class _CustomCustomRouletteWheelState extends State<CustomRouletteWheel>
                             style: TextStyle(
                               fontFamily: 'BebasNeue',
                               fontSize: 44,
-                              color: Colors.white,
+                              color: Colors.black,
                               letterSpacing: 1.2,
                             ),
                           ),
@@ -317,12 +317,30 @@ class _WheelPainter extends CustomPainter {
       ..style = PaintingStyle.stroke
       ..strokeWidth = 2.0;
 
-    final Paint slicePaint = Paint()
+    final Paint spokePaint = Paint()
       ..color = Colors.white
-      // ..color = Color(0xFFF1F1F1)
-      ..style = PaintingStyle.fill;
+      ..style = PaintingStyle.stroke
+      ..strokeWidth = 2.0;
 
-    canvas.drawCircle(center, radius, slicePaint);
+    // Draw alternating red and black slices
+    for (int i = 0; i < totalItems; i++) {
+      final double startAngle = i * sweepAngle;
+      final Color sliceColor = (i % 2 == 0)
+          ? const Color(0xFFD71212)
+          : Colors.black;
+
+      final Paint slicePaint = Paint()
+        ..color = sliceColor
+        ..style = PaintingStyle.fill;
+
+      canvas.drawArc(
+        Rect.fromCircle(center: center, radius: radius),
+        startAngle,
+        sweepAngle,
+        true,
+        slicePaint,
+      );
+    }
 
     // Anchor point roughly midway between the center "GO" button and the
     // outer rim, so wrapped text has roughly equal room to grow toward
@@ -340,21 +358,22 @@ class _WheelPainter extends CustomPainter {
     for (int i = 0; i < totalItems; i++) {
       final double startAngle = i * sweepAngle;
 
+      // Draw white spoke dividers between slices
       canvas.drawLine(
         center,
         Offset(
           center.dx + radius * cos(startAngle),
           center.dy + radius * sin(startAngle),
         ),
-        borderPaint,
+        spokePaint,
       );
 
       if (items.isNotEmpty) {
         final double textAngle = startAngle + sweepAngle / 2;
 
-        // Lay out the text, shrinking the font a point at a time if a
-        // single unbreakable word still overflows the available width
-        // after wrapping (Flutter won't break mid-word on its own).
+        // Lay out the text in white for high contrast on red and black slices,
+        // shrinking the font a point at a time if a single unbreakable word
+        // still overflows the available width after wrapping.
         double fontSize = 11;
         const double minFontSize = 8;
         late TextPainter textPainter;
@@ -366,7 +385,7 @@ class _WheelPainter extends CustomPainter {
                 fontFamily: 'RobotoMono',
                 fontSize: fontSize,
                 fontWeight: FontWeight.w600,
-                color: Colors.black,
+                color: Colors.white,
                 height: 1.05,
               ),
             ),
@@ -395,6 +414,7 @@ class _WheelPainter extends CustomPainter {
       }
     }
 
+    // Outer circle border in black
     canvas.drawCircle(center, radius, borderPaint);
   }
 
