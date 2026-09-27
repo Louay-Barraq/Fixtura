@@ -5,7 +5,8 @@ import 'package:fixtura/l10n/app_localizations.dart';
 import 'dashboard_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
-  const OnboardingScreen({super.key});
+  final bool isReplay;
+  const OnboardingScreen({super.key, this.isReplay = false});
 
   @override
   State<OnboardingScreen> createState() => _OnboardingScreenState();
@@ -55,6 +56,13 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   ];
 
   Future<void> _completeOnboarding() async {
+    if (widget.isReplay) {
+      // Opened from settings — just go back
+      if (mounted) Navigator.of(context).pop();
+      return;
+    }
+
+    // First launch — persist the flag so onboarding won't show again
     final prefs = await SharedPreferences.getInstance();
     await prefs.setBool('hasSeenOnboarding', true);
 
