@@ -241,7 +241,6 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
             },
           ),
         ),
-        // const Gap(50),
 
         // List of Matches in Selected Round
         Expanded(
@@ -358,39 +357,38 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
 
     return Column(
       children: [
+        // Round Selector Chips (pinned at top, matching fixtures tab)
+        if (rounds.isNotEmpty)
+          SizedBox(
+            height: 52,
+            child: ListView.builder(
+              scrollDirection: Axis.horizontal,
+              physics: const BouncingScrollPhysics(),
+              padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
+              itemCount: rounds.length,
+              itemBuilder: (context, index) {
+                final rNum = rounds[index];
+                return RoundChip(
+                  label: '$rNum',
+                  isSelected: _selectedRouletteRound == rNum,
+                  onTap: () {
+                    setState(() {
+                      _selectedRouletteRound = rNum;
+                      _selectedPlayerId = teams.isNotEmpty ? teams.first.id : null;
+                    });
+                  },
+                );
+              },
+            ),
+          ),
+
+        // Scrollable content below the round chips
         Expanded(
           child: SingleChildScrollView(
             physics: const BouncingScrollPhysics(),
             padding: const EdgeInsets.symmetric(vertical: 8),
             child: Column(
               children: [
-                // Round Selector Chips
-                if (rounds.isNotEmpty) ...[
-                  SizedBox(
-                    height: 44,
-                    child: ListView.builder(
-                      scrollDirection: Axis.horizontal,
-                      physics: const BouncingScrollPhysics(),
-                      padding: const EdgeInsets.symmetric(horizontal: 20),
-                      itemCount: rounds.length,
-                      itemBuilder: (context, index) {
-                        final rNum = rounds[index];
-                        return RoundChip(
-                          label: '$rNum',
-                          isSelected: _selectedRouletteRound == rNum,
-                          onTap: () {
-                            setState(() {
-                              _selectedRouletteRound = rNum;
-                              _selectedPlayerId = teams.isNotEmpty ? teams.first.id : null;
-                            });
-                          },
-                        );
-                      },
-                    ),
-                  ),
-                  const Gap(16),
-                ],
-
                 // Current Player Dropdown Selector
                 if (teams.isNotEmpty) ...[
                   DropdownTile(
