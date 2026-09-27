@@ -13,29 +13,35 @@ import 'onboarding_screen.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  final String _appVersion = 'v1.0.0 (1)';
+  final String _appVersion = 'v1.0.0';
   static const List<String> _languages = ['English', 'Français', 'Español', 'العربية'];
 
   Future<void> _launchUrl(BuildContext context, String urlString) async {
-    final Uri uri = Uri.parse(urlString);
     try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('Could not open $urlString'),
-              backgroundColor: const Color(0xFFD71212),
-            ),
-          );
-        }
+      final Uri uri = Uri.parse(urlString);
+      // For mailto and market schemes, launch directly without canLaunchUrl check,
+      // as canLaunchUrl can return false on Android 11+ if no default email app is registered yet.
+      bool launched = false;
+      try {
+        launched = await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } catch (_) {
+        // Fallback for non-external or platform default mode
+        launched = await launchUrl(uri);
+      }
+
+      if (!launched && context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Could not open $urlString'),
+            backgroundColor: const Color(0xFFD71212),
+          ),
+        );
       }
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error: $e'),
+            content: Text('Error opening link: $e'),
             backgroundColor: const Color(0xFFD71212),
           ),
         );
@@ -43,6 +49,7 @@ class SettingsScreen extends StatelessWidget {
     }
   }
 
+  // ignore: unused_element
   void _shareApp(BuildContext context) {
     Share.share(
       'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
@@ -188,24 +195,24 @@ class SettingsScreen extends StatelessWidget {
                       icon: Icons.mail_outline_rounded,
                       title: l10n.contactDeveloper,
                       subtitle: l10n.contactDeveloperSubtitle,
-                      onTap: () => _launchUrl(context, 'mailto:louay.barraq@gmail.com?subject=Fixtura%20Feedback'),
+                      onTap: () => _launchUrl(context, 'mailto:barraklouay@gmail.com?subject=Fixtura%20Feedback'),
                     ),
                     const Gap(10),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.star_border_rounded,
-                      title: l10n.rateFixtura,
-                      subtitle: l10n.rateFixturaSubtitle,
-                      onTap: () => _launchUrl(context, 'market://details?id=com.louaybarraq.fixtura'),
-                    ),
-                    const Gap(10),
-                    _buildSettingsTile(
-                      context,
-                      icon: Icons.share_outlined,
-                      title: l10n.shareWithFriends,
-                      subtitle: l10n.shareSubtitle,
-                      onTap: () => _shareApp(context),
-                    ),
+                    // _buildSettingsTile(
+                    //   context,
+                    //   icon: Icons.star_border_rounded,
+                    //   title: l10n.rateFixtura,
+                    //   subtitle: l10n.rateFixturaSubtitle,
+                    //   onTap: () => _launchUrl(context, 'market://details?id=com.louaybarraq.fixtura'),
+                    // ),
+                    // const Gap(10),
+                    // _buildSettingsTile(
+                    //   context,
+                    //   icon: Icons.share_outlined,
+                    //   title: l10n.shareWithFriends,
+                    //   subtitle: l10n.shareSubtitle,
+                    //   onTap: () => _shareApp(context),
+                    // ),
                     const Gap(24),
 
                     // Section 4: DANGER ZONE

@@ -73,7 +73,7 @@ flutter_native_splash:
   image: "assets/icons/fixtura_splash_android12_white.png"
   android_12:
     color: "#FFFCFC"
-    image: "assets/icons/fixtura_splash_wordmark_white.png"
+    image: "assets/icons/fixtura_splash_wordmark_android12_safe.png"
   android: true
   ios: true
 

@@ -313,9 +313,9 @@ class _WheelPainter extends CustomPainter {
     final double sweepAngle = (2 * pi) / totalItems;
 
     final Paint borderPaint = Paint()
-      ..color = Colors.black
+      ..color = Colors.white
       ..style = PaintingStyle.stroke
-      ..strokeWidth = 2.0;
+      ..strokeWidth = 3.0;
 
     final Paint spokePaint = Paint()
       ..color = Colors.white
