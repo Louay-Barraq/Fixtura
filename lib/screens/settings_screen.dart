@@ -197,7 +197,7 @@ class SettingsScreen extends StatelessWidget {
                       subtitle: l10n.contactDeveloperSubtitle,
                       onTap: () => _launchUrl(context, 'mailto:barraklouay@gmail.com?subject=Fixtura%20Feedback'),
                     ),
-                    const Gap(10),
+                    // const Gap(10),
                     // _buildSettingsTile(
                     //   context,
                     //   icon: Icons.star_border_rounded,
