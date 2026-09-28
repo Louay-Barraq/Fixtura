@@ -16,6 +16,8 @@ import 'create_tournament_screen.dart';
 import 'tournament_details_screen.dart';
 import 'standalone_roulette_screen.dart';
 
+enum TournamentFilter { all, active, finished }
+
 class DashboardScreen extends StatefulWidget {
   const DashboardScreen({super.key});
 
@@ -25,6 +27,7 @@ class DashboardScreen extends StatefulWidget {
 
 class _DashboardScreenState extends State<DashboardScreen> {
   int _currentNavIndex = 0; // 0 = Home, 1 = Tournaments, 2 = Roulette
+  TournamentFilter _tournamentFilter = TournamentFilter.all;
 
   @override
   void initState() {
@@ -158,19 +161,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
           LongSectionHeader(title: l10n?.tournaments ?? 'TOURNAMENTS'),
           const Gap(12),
 
-          // Stats Cards Row
+          // Stats Cards Row (tapping navigates to Tournaments tab with selected filter)
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Expanded(
-                  child: StatCard(label: l10n?.total ?? 'Total', value: '$totalCount'),
+                  child: StatCard(
+                    label: l10n?.total ?? 'Total',
+                    value: '$totalCount',
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.all;
+                        _currentNavIndex = 1;
+                      });
+                    },
+                  ),
                 ),
                 Expanded(
-                  child: StatCard(label: l10n?.active ?? 'Active', value: '$activeCount'),
+                  child: StatCard(
+                    label: l10n?.active ?? 'Active',
+                    value: '$activeCount',
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.active;
+                        _currentNavIndex = 1;
+                      });
+                    },
+                  ),
                 ),
                 Expanded(
-                  child: StatCard(label: l10n?.finished ?? 'Finished', value: '$finishedCount'),
+                  child: StatCard(
+                    label: l10n?.finished ?? 'Finished',
+                    value: '$finishedCount',
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.finished;
+                        _currentNavIndex = 1;
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
@@ -220,6 +250,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
     int finishedCount,
   ) {
     final l10n = AppLocalizations.of(context);
+
+    // Filter tournaments based on active selection
+    final List<Tournament> filteredTournaments = switch (_tournamentFilter) {
+      TournamentFilter.active => provider.tournaments.where((t) => t.status == 'active').toList(),
+      TournamentFilter.finished => provider.tournaments.where((t) => t.status == 'completed').toList(),
+      TournamentFilter.all => provider.tournaments,
+    };
+
     return SingleChildScrollView(
       physics: const BouncingScrollPhysics(),
       child: Column(
@@ -228,19 +266,46 @@ class _DashboardScreenState extends State<DashboardScreen> {
           LongSectionHeader(title: l10n?.tournaments ?? 'TOURNAMENTS'),
           const Gap(12),
 
-          // Stats Cards Row
+          // Stats Cards Row with interactive filtering
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16),
             child: Row(
               children: [
                 Expanded(
-                  child: StatCard(label: l10n?.total ?? 'Total', value: '$totalCount'),
+                  child: StatCard(
+                    label: l10n?.total ?? 'Total',
+                    value: '$totalCount',
+                    isSelected: _tournamentFilter == TournamentFilter.all,
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.all;
+                      });
+                    },
+                  ),
                 ),
                 Expanded(
-                  child: StatCard(label: l10n?.active ?? 'Active', value: '$activeCount'),
+                  child: StatCard(
+                    label: l10n?.active ?? 'Active',
+                    value: '$activeCount',
+                    isSelected: _tournamentFilter == TournamentFilter.active,
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.active;
+                      });
+                    },
+                  ),
                 ),
                 Expanded(
-                  child: StatCard(label: l10n?.finished ?? 'Finished', value: '$finishedCount'),
+                  child: StatCard(
+                    label: l10n?.finished ?? 'Finished',
+                    value: '$finishedCount',
+                    isSelected: _tournamentFilter == TournamentFilter.finished,
+                    onTap: () {
+                      setState(() {
+                        _tournamentFilter = TournamentFilter.finished;
+                      });
+                    },
+                  ),
                 ),
               ],
             ),
@@ -257,11 +322,11 @@ class _DashboardScreenState extends State<DashboardScreen> {
           ),
           const Gap(12),
 
-          // Full Tournaments List
-          if (provider.tournaments.isEmpty)
+          // Tournaments List (Filtered)
+          if (filteredTournaments.isEmpty)
             _buildEmptyState(context)
           else
-            ...provider.tournaments.map(
+            ...filteredTournaments.map(
               (t) => Padding(
                 padding: const EdgeInsets.only(bottom: 12.0),
                 child: _buildTournamentWidget(t, provider),
@@ -278,14 +343,10 @@ class _DashboardScreenState extends State<DashboardScreen> {
     final allMatches = t.id != null ? provider.getMatchesForTournamentId(t.id!) : <MatchModel>[];
     final teams = t.id != null ? provider.getTeamsForTournamentId(t.id!) : <Team>[];
 
-    // Exclude dummy BYE matches (where either team is null)
-    final playableMatches = allMatches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
-    final completedMatches = playableMatches.where((m) => m.isPlayed).length;
-    final progress = playableMatches.isEmpty
-        ? 0
-        : ((completedMatches / playableMatches.length) * 100).round();
+    final progress = provider.calculateTournamentProgress(t.type, allMatches);
 
     // Pick the most recent real played match
+    final playableMatches = allMatches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
     final lastMatch = playableMatches.where((m) => m.isPlayed).toList().lastOrNull;
 
     String? player1Name;

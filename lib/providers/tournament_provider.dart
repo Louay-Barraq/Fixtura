@@ -35,20 +35,58 @@ class TournamentProvider extends ChangeNotifier {
     return _tournamentTeams[id] ?? [];
   }
 
+  // Calculate tournament progress percentage (0 to 100)
+  int calculateTournamentProgress(TournamentType type, List<MatchModel> matches) {
+    if (matches.isEmpty) return 0;
+
+    if (type == TournamentType.knockout) {
+      final completedMatches = matches.where((m) => m.isPlayed).length;
+      return ((completedMatches / matches.length) * 100).round();
+    } else {
+      final playableMatches = matches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
+      if (playableMatches.isEmpty) return 0;
+      final completedMatches = playableMatches.where((m) => m.isPlayed).length;
+      return ((completedMatches / playableMatches.length) * 100).round();
+    }
+  }
+
+  // Calculate tournament status ('active' vs 'completed') based on progress
+  String calculateTournamentStatus(TournamentType type, List<MatchModel> matches) {
+    if (matches.isEmpty) return 'active';
+    final progress = calculateTournamentProgress(type, matches);
+    return progress >= 100 ? 'completed' : 'active';
+  }
+
   // Fetch all tournaments (for dashboard/history list)
   Future<void> loadAllTournaments() async {
     _isLoading = true;
     notifyListeners();
     try {
-      _tournaments = await _dbHelper.getAllTournaments();
+      final rawTournaments = await _dbHelper.getAllTournaments();
       final matchesMap = <int, List<MatchModel>>{};
       final teamsMap = <int, List<Team>>{};
-      for (final t in _tournaments) {
+      final updatedTournaments = <Tournament>[];
+
+      for (final t in rawTournaments) {
         if (t.id != null) {
-          matchesMap[t.id!] = await _dbHelper.getMatchesForTournament(t.id!);
-          teamsMap[t.id!] = await _dbHelper.getTeamsForTournament(t.id!);
+          final tMatches = await _dbHelper.getMatchesForTournament(t.id!);
+          final tTeams = await _dbHelper.getTeamsForTournament(t.id!);
+          matchesMap[t.id!] = tMatches;
+          teamsMap[t.id!] = tTeams;
+
+          final computedStatus = calculateTournamentStatus(t.type, tMatches);
+          if (t.status != computedStatus) {
+            final updatedT = t.copyWith(status: computedStatus);
+            await _dbHelper.updateTournament(updatedT);
+            updatedTournaments.add(updatedT);
+          } else {
+            updatedTournaments.add(t);
+          }
+        } else {
+          updatedTournaments.add(t);
         }
       }
+      _tournaments = updatedTournaments;
       _tournamentMatches = matchesMap;
       _tournamentTeams = teamsMap;
     } catch (e) {
@@ -69,6 +107,19 @@ class TournamentProvider extends ChangeNotifier {
         _activeTeams = await _dbHelper.getTeamsForTournament(id);
         _activeMatches = await _dbHelper.getMatchesForTournament(id);
         _activeRouletteAssignments = await _loadRouletteAssignments(id);
+
+        final computedStatus = calculateTournamentStatus(
+          _activeTournament!.type,
+          _activeMatches,
+        );
+        if (_activeTournament!.status != computedStatus) {
+          _activeTournament = _activeTournament!.copyWith(status: computedStatus);
+          await _dbHelper.updateTournament(_activeTournament!);
+          final idx = _tournaments.indexWhere((t) => t.id == id);
+          if (idx != -1) {
+            _tournaments[idx] = _activeTournament!;
+          }
+        }
       } else {
         _activeRouletteAssignments = {};
       }
@@ -689,6 +740,20 @@ class TournamentProvider extends ChangeNotifier {
       // Reload active matches and details
       if (_activeTournament != null) {
         _activeMatches = await _dbHelper.getMatchesForTournament(_activeTournament!.id!);
+        _tournamentMatches[_activeTournament!.id!] = _activeMatches;
+
+        final computedStatus = calculateTournamentStatus(
+          _activeTournament!.type,
+          _activeMatches,
+        );
+        if (_activeTournament!.status != computedStatus) {
+          _activeTournament = _activeTournament!.copyWith(status: computedStatus);
+          await _dbHelper.updateTournament(_activeTournament!);
+          final idx = _tournaments.indexWhere((t) => t.id == _activeTournament!.id);
+          if (idx != -1) {
+            _tournaments[idx] = _activeTournament!;
+          }
+        }
       }
     } catch (e) {
       debugPrint("Error updating match score: $e");

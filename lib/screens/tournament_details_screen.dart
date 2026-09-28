@@ -99,10 +99,8 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
           }
         }
 
-        // Calculate progress percentage (excluding dummy BYE matches)
-        final playableMatches = matches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
-        final completedMatches = playableMatches.where((m) => m.isPlayed).length;
-        final progress = playableMatches.isEmpty ? 0 : ((completedMatches / playableMatches.length) * 100).round();
+        // Calculate progress percentage
+        final progress = provider.calculateTournamentProgress(tournament.type, matches);
 
         return Scaffold(
           backgroundColor: const Color(0xFFFFFCFC),
