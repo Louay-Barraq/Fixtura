@@ -187,7 +187,7 @@ class SettingsScreen extends StatelessWidget {
                       icon: Icons.privacy_tip_outlined,
                       title: l10n.privacyPolicy,
                       subtitle: l10n.privacyPolicySubtitle,
-                      onTap: () => _launchUrl(context, 'https://louay-barraq.github.io/elboutoula/'),
+                      onTap: () => _launchUrl(context, 'https://louay-barraq.github.io/Fixtura/'),
                     ),
                     const Gap(10),
                     _buildSettingsTile(
