@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fixtura/l10n/app_localizations.dart';
 import '../screens/settings_screen.dart';
+import 'circle_icon_button.dart';
 
 class MainAppbar extends StatelessWidget implements PreferredSizeWidget {
   final bool showSettingsButton;
@@ -65,7 +66,10 @@ class MainAppbar extends StatelessWidget implements PreferredSizeWidget {
                 textDirection: Directionality.of(context),
                 top: 10,
                 end: 10,
-                child: GestureDetector(
+                child: CircleIconButton(
+                  icon: Icons.settings,
+                  iconSize: 28,
+                  iconColor: const Color(0xFFD71212),
                   onTap: () {
                     Navigator.push(
                       context,
@@ -74,30 +78,6 @@ class MainAppbar extends StatelessWidget implements PreferredSizeWidget {
                       ),
                     );
                   },
-                  child: Container(
-                    width: 40,
-                    height: 40,
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      shape: BoxShape.circle,
-                      border: Border.all(color: Colors.black, width: 2),
-                      boxShadow: [
-                        BoxShadow(
-                          offset: const Offset(0, 2),
-                          blurRadius: 4,
-                          spreadRadius: 0,
-                          color: Colors.black.withValues(alpha: 0.25),
-                        ),
-                      ],
-                    ),
-                    child: const Center(
-                      child: Icon(
-                        Icons.settings,
-                        size: 28,
-                        color: Color(0xFFD71212),
-                      ),
-                    ),
-                  ),
                 ),
               ),
           ],

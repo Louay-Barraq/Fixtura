@@ -6,6 +6,8 @@ import '../models/team.dart';
 import '../models/tournament.dart';
 import '../models/standing.dart';
 import '../providers/tournament_provider.dart';
+import '../widgets/app_back_button.dart';
+import '../widgets/circle_icon_button.dart';
 import '../widgets/tournament_appbar.dart';
 import '../widgets/tournament_tab_bar.dart';
 import '../widgets/round_chip.dart';
@@ -114,28 +116,19 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                       tournamentName: tournament.name,
                       progressValue: progress,
                     ),
-                    Positioned.directional(
-                      textDirection: Directionality.of(context),
-                      start: 0,
-                      top: 10,
-                      child: IconButton(
-                        icon: Transform.flip(
-                          flipX: Directionality.of(context) == TextDirection.rtl,
-                          child: const Icon(Icons.arrow_back, color: Colors.black),
-                        ),
-                        onPressed: () {
-                          provider.loadAllTournaments();
-                          Navigator.pop(context);
-                        },
-                      ),
+                    AppBackButton(
+                      onTap: () {
+                        provider.loadAllTournaments();
+                        Navigator.pop(context);
+                      },
                     ),
                     Positioned.directional(
                       textDirection: Directionality.of(context),
                       end: 10,
                       top: 10,
-                      child: IconButton(
-                        icon: const Icon(Icons.tune_rounded, color: Colors.black),
-                        onPressed: () {
+                      child: CircleIconButton(
+                        icon: Icons.tune_rounded,
+                        onTap: () {
                           Navigator.push(
                             context,
                             MaterialPageRoute(

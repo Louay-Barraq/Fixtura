@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:fixtura/l10n/app_localizations.dart';
+import '../widgets/app_back_button.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/short_section_header.dart';
 import '../widgets/custom_roulette_wheel.dart';
@@ -29,18 +30,7 @@ class _StandaloneRouletteScreenState extends State<StandaloneRouletteScreen> {
             Stack(
               children: [
                 const MainAppbar(),
-                Positioned.directional(
-                  textDirection: Directionality.of(context),
-                  start: 10,
-                  top: 10,
-                  child: IconButton(
-                    icon: Transform.flip(
-                      flipX: Directionality.of(context) == TextDirection.rtl,
-                      child: const Icon(Icons.arrow_back, color: Colors.black),
-                    ),
-                    onPressed: () => Navigator.pop(context),
-                  ),
-                ),
+                const AppBackButton(),
               ],
             ),
 
