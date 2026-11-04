@@ -1,3 +1,5 @@
+const Object _keep = Object();
+
 class MatchModel {
   final int? id;
   final int tournamentId;
@@ -63,13 +65,15 @@ class MatchModel {
     );
   }
 
+  // Team and score fields can be cleared by passing null explicitly, so they
+  // default to a marker that means "keep the current value".
   MatchModel copyWith({
     int? id,
     int? tournamentId,
-    int? homeTeamId,
-    int? awayTeamId,
-    int? homeScore,
-    int? awayScore,
+    Object? homeTeamId = _keep,
+    Object? awayTeamId = _keep,
+    Object? homeScore = _keep,
+    Object? awayScore = _keep,
     bool? isPlayed,
     int? roundNumber,
     String? roundName,
@@ -80,10 +84,10 @@ class MatchModel {
     return MatchModel(
       id: id ?? this.id,
       tournamentId: tournamentId ?? this.tournamentId,
-      homeTeamId: homeTeamId ?? this.homeTeamId,
-      awayTeamId: awayTeamId ?? this.awayTeamId,
-      homeScore: homeScore ?? this.homeScore,
-      awayScore: awayScore ?? this.awayScore,
+      homeTeamId: identical(homeTeamId, _keep) ? this.homeTeamId : homeTeamId as int?,
+      awayTeamId: identical(awayTeamId, _keep) ? this.awayTeamId : awayTeamId as int?,
+      homeScore: identical(homeScore, _keep) ? this.homeScore : homeScore as int?,
+      awayScore: identical(awayScore, _keep) ? this.awayScore : awayScore as int?,
       isPlayed: isPlayed ?? this.isPlayed,
       roundNumber: roundNumber ?? this.roundNumber,
       roundName: roundName ?? this.roundName,
