@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:fixtura/models/match.dart';
 import 'package:fixtura/models/tournament.dart';
 import 'package:fixtura/providers/tournament_provider.dart';
@@ -7,10 +9,13 @@ import 'package:sqflite_common_ffi/sqflite_ffi.dart';
 void main() {
   late TournamentProvider provider;
 
-  setUpAll(() {
+  setUpAll(() async {
     TestWidgetsFlutterBinding.ensureInitialized();
     sqfliteFfiInit();
     databaseFactory = databaseFactoryFfi;
+    // Test files run in parallel, so each one needs its own database.
+    final dir = await Directory.systemTemp.createTemp('fixtura_test');
+    await databaseFactory.setDatabasesPath(dir.path);
   });
 
   setUp(() async {

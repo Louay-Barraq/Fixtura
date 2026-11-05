@@ -93,5 +93,8 @@
   "playerNames": "أسماء اللاعبين",
   "editPlayerHint": "تعديل اسم اللاعب",
   "tournamentUpdatedSuccess": "تم تحديث البطولة بنجاح!",
-  "delete": "حذف"
+  "delete": "حذف",
+  "laterResultWarningTitle": "حذف نتيجة لاحقة؟",
+  "laterResultWarningBody": "سيؤدي تغيير هذه النتيجة إلى حذف نتيجة {round} وكل الأدوار التي تليها، وسيتعين عليك إدخالها من جديد.",
+  "laterResultWarningContinue": "متابعة"
 }

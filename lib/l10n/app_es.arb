@@ -93,5 +93,8 @@
   "playerNames": "NOMBRES DE JUGADORES",
   "editPlayerHint": "Nombre del jugador",
   "tournamentUpdatedSuccess": "¡Torneo actualizado con éxito!",
-  "delete": "ELIMINAR"
+  "delete": "ELIMINAR",
+  "laterResultWarningTitle": "¿BORRAR UN RESULTADO POSTERIOR?",
+  "laterResultWarningBody": "Cambiar este resultado borrará el de: {round}, y el de las rondas siguientes. Tendrás que introducirlos de nuevo.",
+  "laterResultWarningContinue": "CONTINUAR"
 }

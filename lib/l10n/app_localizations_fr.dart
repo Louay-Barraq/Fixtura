@@ -303,4 +303,15 @@ class AppLocalizationsFr extends AppLocalizations {
 
   @override
   String get delete => 'SUPPRIMER';
+
+  @override
+  String get laterResultWarningTitle => 'EFFACER UN RÉSULTAT SUIVANT ?';
+
+  @override
+  String laterResultWarningBody(String round) {
+    return 'Modifier ce score effacera le résultat de : $round, ainsi que des tours suivants. Vous devrez les saisir à nouveau.';
+  }
+
+  @override
+  String get laterResultWarningContinue => 'CONTINUER';
 }

@@ -93,5 +93,8 @@
   "playerNames": "NOMS DES JOUEURS",
   "editPlayerHint": "Nom du joueur",
   "tournamentUpdatedSuccess": "Tournoi mis à jour avec succès !",
-  "delete": "SUPPRIMER"
+  "delete": "SUPPRIMER",
+  "laterResultWarningTitle": "EFFACER UN RÉSULTAT SUIVANT ?",
+  "laterResultWarningBody": "Modifier ce score effacera le résultat de : {round}, ainsi que des tours suivants. Vous devrez les saisir à nouveau.",
+  "laterResultWarningContinue": "CONTINUER"
 }

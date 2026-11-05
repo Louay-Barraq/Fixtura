@@ -707,6 +707,26 @@ class TournamentProvider extends ChangeNotifier {
     return "Round of ${1 << (roundsFromFinal + 1)}";
   }
 
+  // The already-played next match that saving this score would clear, if any.
+  // Pass null scores when the result is being reset.
+  MatchModel? laterMatchClearedBy(MatchModel match, int? homeScore, int? awayScore) {
+    if (_activeTournament?.type != TournamentType.knockout || match.nextMatchId == null) {
+      return null;
+    }
+
+    final nextIndex = _activeMatches.indexWhere((m) => m.id == match.nextMatchId);
+    if (nextIndex == -1) return null;
+    final nextMatch = _activeMatches[nextIndex];
+    if (!nextMatch.isPlayed) return null;
+
+    if (homeScore == null || awayScore == null) return nextMatch;
+    if (homeScore == awayScore) return null;
+
+    final winnerId = homeScore > awayScore ? match.homeTeamId : match.awayTeamId;
+    final advancedId = match.nextMatchIsHome == true ? nextMatch.homeTeamId : nextMatch.awayTeamId;
+    return winnerId == advancedId ? null : nextMatch;
+  }
+
   // Update a match score
   Future<void> updateMatchScore(int matchId, int? homeScore, int? awayScore) async {
     _isLoading = true;

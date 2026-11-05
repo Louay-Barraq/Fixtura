@@ -107,5 +107,15 @@
   "playerNames": "PLAYER NAMES",
   "editPlayerHint": "Edit player name",
   "tournamentUpdatedSuccess": "Tournament updated successfully!",
-  "delete": "DELETE"
+  "delete": "DELETE",
+  "laterResultWarningTitle": "CLEAR LATER RESULT?",
+  "laterResultWarningBody": "Changing this score will clear the result of the {round} and any rounds after it. You will need to enter them again.",
+  "@laterResultWarningBody": {
+    "placeholders": {
+      "round": {
+        "type": "String"
+      }
+    }
+  },
+  "laterResultWarningContinue": "CONTINUE"
 }

@@ -298,4 +298,15 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get delete => 'DELETE';
+
+  @override
+  String get laterResultWarningTitle => 'CLEAR LATER RESULT?';
+
+  @override
+  String laterResultWarningBody(String round) {
+    return 'Changing this score will clear the result of the $round and any rounds after it. You will need to enter them again.';
+  }
+
+  @override
+  String get laterResultWarningContinue => 'CONTINUE';
 }

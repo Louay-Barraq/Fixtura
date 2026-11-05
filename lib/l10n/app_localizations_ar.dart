@@ -298,4 +298,15 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get delete => 'حذف';
+
+  @override
+  String get laterResultWarningTitle => 'حذف نتيجة لاحقة؟';
+
+  @override
+  String laterResultWarningBody(String round) {
+    return 'سيؤدي تغيير هذه النتيجة إلى حذف نتيجة $round وكل الأدوار التي تليها، وسيتعين عليك إدخالها من جديد.';
+  }
+
+  @override
+  String get laterResultWarningContinue => 'متابعة';
 }

@@ -304,4 +304,15 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get delete => 'ELIMINAR';
+
+  @override
+  String get laterResultWarningTitle => '¿BORRAR UN RESULTADO POSTERIOR?';
+
+  @override
+  String laterResultWarningBody(String round) {
+    return 'Cambiar este resultado borrará el de: $round, y el de las rondas siguientes. Tendrás que introducirlos de nuevo.';
+  }
+
+  @override
+  String get laterResultWarningContinue => 'CONTINUAR';
 }

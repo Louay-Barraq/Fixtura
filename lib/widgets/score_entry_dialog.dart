@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '../models/match.dart';
 import '../models/team.dart';
 import '../models/tournament.dart';
@@ -38,7 +39,63 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
     _awayScore = widget.match.awayScore ?? 0;
   }
 
-  void _saveScore() {
+  // Asks before a save would wipe a later match's result. True means go ahead.
+  Future<bool> _confirmLaterResultCleared(int? homeScore, int? awayScore) async {
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    final clearedMatch = provider.laterMatchClearedBy(widget.match, homeScore, awayScore);
+    if (clearedMatch == null) return true;
+
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          l10n.laterResultWarningTitle,
+          style: const TextStyle(
+            fontFamily: 'BebasNeue',
+            fontSize: 22,
+            color: Color(0xFFD71212),
+          ),
+        ),
+        content: Text(
+          l10n.laterResultWarningBody(clearedMatch.roundName),
+          style: const TextStyle(
+            fontFamily: 'RobotoMono',
+            fontSize: 13,
+            color: Colors.black87,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(
+                fontFamily: 'RobotoMono',
+                color: Colors.black54,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.laterResultWarningContinue,
+              style: const TextStyle(
+                fontFamily: 'RobotoMono',
+                color: Color(0xFFD71212),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
+  Future<void> _saveScore() async {
     if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
       if (_penaltyWinnerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -62,13 +119,17 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
       }
     }
 
+    if (!await _confirmLaterResultCleared(finalHScore, finalAScore) || !mounted) return;
+
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     provider.updateMatchScore(widget.match.id!, finalHScore, finalAScore);
 
     Navigator.pop(context);
   }
 
-  void _clearScore() {
+  Future<void> _clearScore() async {
+    if (!await _confirmLaterResultCleared(null, null) || !mounted) return;
+
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     provider.updateMatchScore(widget.match.id!, null, null);
     Navigator.pop(context);

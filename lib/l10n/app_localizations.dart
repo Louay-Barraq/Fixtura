@@ -665,6 +665,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DELETE'**
   String get delete;
+
+  /// No description provided for @laterResultWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CLEAR LATER RESULT?'**
+  String get laterResultWarningTitle;
+
+  /// No description provided for @laterResultWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing this score will clear the result of the {round} and any rounds after it. You will need to enter them again.'**
+  String laterResultWarningBody(String round);
+
+  /// No description provided for @laterResultWarningContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'CONTINUE'**
+  String get laterResultWarningContinue;
 }
 
 class _AppLocalizationsDelegate
