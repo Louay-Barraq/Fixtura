@@ -27,6 +27,7 @@ The app supports:
 - Round-robin league support with single or double legs
 - Custom points system for wins, draws, and losses
 - Knockout bracket generation with automatic BYE handling
+- Groups + knockout: 2, 4 or 8 groups, the top 1 or 2 of each group go into a bracket that fills in when the group stage ends
 - Optional Team Roulette setup with a configurable roulette pool
 - Option to keep roulette assignments unique across rounds
 
@@ -34,9 +35,14 @@ The app supports:
 
 - Fixture list with round selection
 - League standings table
-- Knockout bracket board
-- Winner banner when a tournament is completed
+- One standings table per group in a groups + knockout tournament
+- Share button that sends a text summary (champion, tables, latest results, next matches)
 - Roulette drafting tab when Team Roulette is enabled
+
+### Backup
+
+- Settings > Backup exports every tournament to a JSON file and imports one back
+- Importing skips tournaments that are already in the app
 
 ### Roulette Drafting
 
@@ -71,7 +77,7 @@ There is also a separate roulette screen for quick use outside a tournament. It 
 - `lib/screens/` - dashboard, tournament creation, tournament details, standalone roulette
 - `lib/providers/` - app state and tournament logic
 - `lib/models/` - tournament, team, match, and standing models
-- `lib/widgets/` - reusable UI components such as the roulette wheel, match cards, and bracket board
+- `lib/widgets/` - reusable UI components such as the roulette wheel, and match cards
 - `lib/database/` - SQLite helper and schema management
 - `lib/theme/` - shared color and style definitions
 
