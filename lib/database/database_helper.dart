@@ -23,7 +23,7 @@ class DatabaseHelper {
 
     return await openDatabase(
       path,
-      version: 4,
+      version: 5,
       onCreate: _createDB,
       onUpgrade: _upgradeDB,
       onOpen: (db) async {
@@ -56,6 +56,12 @@ class DatabaseHelper {
         )
       ''');
     }
+    if (oldVersion < 5) {
+      await db.execute('ALTER TABLE tournaments ADD COLUMN group_count INTEGER NOT NULL DEFAULT 0');
+      await db.execute('ALTER TABLE tournaments ADD COLUMN qualifiers_per_group INTEGER NOT NULL DEFAULT 0');
+      await db.execute('ALTER TABLE teams ADD COLUMN group_index INTEGER');
+      await db.execute('ALTER TABLE matches ADD COLUMN group_index INTEGER');
+    }
   }
 
   Future _createDB(Database db, int version) async {
@@ -77,7 +83,9 @@ class DatabaseHelper {
         use_roulette INTEGER NOT NULL DEFAULT 0,
         roulette_pool TEXT,
         roulette_unique INTEGER NOT NULL DEFAULT 1,
-        roulette_round_unique INTEGER NOT NULL DEFAULT 1
+        roulette_round_unique INTEGER NOT NULL DEFAULT 1,
+        group_count INTEGER NOT NULL DEFAULT 0,
+        qualifiers_per_group INTEGER NOT NULL DEFAULT 0
       )
     ''');
 
@@ -89,6 +97,7 @@ class DatabaseHelper {
         name TEXT NOT NULL,
         color_hex TEXT,
         assigned_team TEXT,
+        group_index INTEGER,
         FOREIGN KEY (tournament_id) REFERENCES tournaments (id) ON DELETE CASCADE
       )
     ''');
@@ -122,6 +131,7 @@ class DatabaseHelper {
         bracket_pos INTEGER,
         next_match_id INTEGER,
         next_match_is_home INTEGER,
+        group_index INTEGER,
         FOREIGN KEY (tournament_id) REFERENCES tournaments (id) ON DELETE CASCADE,
         FOREIGN KEY (home_team_id) REFERENCES teams (id) ON DELETE SET NULL,
         FOREIGN KEY (away_team_id) REFERENCES teams (id) ON DELETE SET NULL,
@@ -193,8 +203,8 @@ class DatabaseHelper {
     return await db.insert('teams', team.toMap());
   }
 
-  Future<List<Team>> getTeamsForTournament(int tournamentId) async {
-    final db = await instance.database;
+  Future<List<Team>> getTeamsForTournament(int tournamentId, [DatabaseExecutor? executor]) async {
+    final db = executor ?? await instance.database;
     final result = await db.query(
       'teams',
       where: 'tournament_id = ?',
@@ -230,8 +240,8 @@ class DatabaseHelper {
     return await db.insert('matches', match.toMap());
   }
 
-  Future<List<MatchModel>> getMatchesForTournament(int tournamentId) async {
-    final db = await instance.database;
+  Future<List<MatchModel>> getMatchesForTournament(int tournamentId, [DatabaseExecutor? executor]) async {
+    final db = executor ?? await instance.database;
     final result = await db.query(
       'matches',
       where: 'tournament_id = ?',

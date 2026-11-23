@@ -7,6 +7,7 @@ class FormatOptionCard extends StatelessWidget {
   final CustomPainter Function(Color color)? customPainter;
   final bool isSelected;
   final VoidCallback onTap;
+  final double? width;
 
   const FormatOptionCard({
     super.key,
@@ -16,6 +17,7 @@ class FormatOptionCard extends StatelessWidget {
     this.customPainter,
     required this.isSelected,
     required this.onTap,
+    this.width = 160,
   });
 
   @override
@@ -25,7 +27,7 @@ class FormatOptionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        width: 160,
+        width: width,
         height: 115,
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
@@ -78,6 +80,9 @@ class FormatOptionCard extends StatelessWidget {
             ),
             Text(
               subtitle,
+              textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontFamily: 'RobotoMono',
                 fontSize: 10,

@@ -7,6 +7,7 @@ import '../models/team.dart';
 import '../models/tournament.dart';
 import '../models/standing.dart';
 import '../providers/tournament_provider.dart';
+import '../logic/tournament_rules.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/tournament_appbar.dart';
@@ -243,44 +244,81 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                     style: const TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
                   ),
                 )
-              : ListView.builder(
+              : ListView(
                   physics: const BouncingScrollPhysics(),
                   padding: const EdgeInsets.only(bottom: 24),
-                  itemCount: filteredMatches.length,
-                  itemBuilder: (context, index) {
-                    final match = filteredMatches[index];
-                    final homeTeam = teams.firstWhere(
-                      (t) => t.id == match.homeTeamId,
-                      orElse: () => Team(id: -1, tournamentId: -1, name: 'TBD'),
-                    );
-                    final awayTeam = teams.firstWhere(
-                      (t) => t.id == match.awayTeamId,
-                      orElse: () => Team(id: -1, tournamentId: -1, name: 'TBD'),
-                    );
-
-                    return CustomMatchCard(
-                      match: match,
-                      homeTeam: homeTeam.id == -1 ? null : homeTeam,
-                      awayTeam: awayTeam.id == -1 ? null : awayTeam,
-                      tournamentType: tournament.type,
-                      roundNumber: match.roundNumber,
-                      assignedTeamResolver: (team, roundNumber) {
-                        if (team == null || team.id == null || roundNumber == null) return null;
-                        return provider.getRouletteAssignmentForTeamRound(team.id!, roundNumber);
-                      },
-                    );
-                  },
+                  children: _buildRoundMatchList(tournament, teams, matches, filteredMatches, provider),
                 ),
         ),
       ],
     );
   }
 
+  List<Widget> _buildRoundMatchList(
+    Tournament tournament,
+    List<Team> teams,
+    List<MatchModel> allMatches,
+    List<MatchModel> roundMatches,
+    TournamentProvider provider,
+  ) {
+    final l10n = AppLocalizations.of(context)!;
+    final isGroups = tournament.type == TournamentType.groupsKnockout;
+    final sorted = [...roundMatches]
+      ..sort((a, b) => (a.groupIndex ?? -1).compareTo(b.groupIndex ?? -1));
+    final widgets = <Widget>[];
+
+    if (isGroups && sorted.first.groupIndex == null && !groupStageComplete(allMatches)) {
+      widgets.add(
+        Padding(
+          padding: const EdgeInsets.fromLTRB(20, 4, 20, 8),
+          child: Text(
+            l10n.knockoutWaitingForGroups,
+            textAlign: TextAlign.center,
+            style: const TextStyle(fontFamily: 'RobotoMono', fontSize: 12, color: Colors.black54),
+          ),
+        ),
+      );
+    }
+
+    int? currentGroup;
+    for (final match in sorted) {
+      if (match.groupIndex != null && match.groupIndex != currentGroup) {
+        currentGroup = match.groupIndex;
+        widgets.add(
+          Padding(
+            padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 12, bottom: 6),
+            child: ShortSectionHeader(title: l10n.groupName(groupLetter(currentGroup!))),
+          ),
+        );
+      }
+
+      Team? find(int? id) => id == null ? null : teams.where((t) => t.id == id).firstOrNull;
+      widgets.add(
+        CustomMatchCard(
+          match: match,
+          homeTeam: find(match.homeTeamId),
+          awayTeam: find(match.awayTeamId),
+          tournamentType: stageType(tournament.type, match),
+          roundNumber: match.roundNumber,
+          assignedTeamResolver: (team, roundNumber) {
+            if (team == null || team.id == null || roundNumber == null) return null;
+            return provider.getRouletteAssignmentForTeamRound(team.id!, roundNumber);
+          },
+        ),
+      );
+    }
+    return widgets;
+  }
+
   // --- STANDINGS TAB VIEW ---
   Widget _buildStandingsTab(TournamentProvider provider) {
-    final List<Standing> standings = provider.calculateStandings();
+    final tournament = provider.activeTournament!;
+    final isGroups = tournament.type == TournamentType.groupsKnockout;
+    final tables = isGroups
+        ? provider.calculateGroupStandings()
+        : [provider.calculateStandings()].where((t) => t.isNotEmpty).toList();
 
-    if (standings.isEmpty) {
+    if (tables.isEmpty) {
       return Center(
         child: Text(
           AppLocalizations.of(context)!.noStandings,
@@ -294,34 +332,44 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
       child: Column(
         children: [
-          // Table Header (RANK, PLAYER, GD, PTS)
-          const StandingsHeader(),
-          const Gap(10),
-
-          // List of Standing Rows
-          ...List.generate(standings.length, (index) {
-            final standing = standings[index];
-            final rank = index + 1;
-            final pts = standing.points(
-              provider.activeTournament!.pointsForWin,
-              provider.activeTournament!.pointsForDraw,
-              provider.activeTournament!.pointsForLoss,
-            );
-
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 8.0),
-              child: StandingRowTile(
-                rank: rank,
-                playerName: standing.team.name,
-                teamName: standing.team.assignedTeam,
-                goalDifference: standing.goalDifference,
-                points: pts,
+          for (var g = 0; g < tables.length; g++) ...[
+            if (isGroups) ...[
+              if (g > 0) const Gap(16),
+              ShortSectionHeader(
+                title: AppLocalizations.of(context)!.groupName(groupLetter(g)),
               ),
-            );
-          }),
+              const Gap(10),
+            ],
+            // Table Header (RANK, PLAYER, GD, PTS)
+            const StandingsHeader(),
+            const Gap(10),
+            ..._buildStandingRows(tournament, tables[g]),
+          ],
         ],
       ),
     );
+  }
+
+  List<Widget> _buildStandingRows(Tournament tournament, List<Standing> standings) {
+    return List.generate(standings.length, (index) {
+      final standing = standings[index];
+      final pts = standing.points(
+        tournament.pointsForWin,
+        tournament.pointsForDraw,
+        tournament.pointsForLoss,
+      );
+
+      return Padding(
+        padding: const EdgeInsets.only(bottom: 8.0),
+        child: StandingRowTile(
+          rank: index + 1,
+          playerName: standing.team.name,
+          teamName: standing.team.assignedTeam,
+          goalDifference: standing.goalDifference,
+          points: pts,
+        ),
+      );
+    });
   }
 
   String _draftErrorMessage(RouletteDraftError error) {

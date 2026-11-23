@@ -1,4 +1,4 @@
-enum TournamentType { roundRobin, knockout }
+enum TournamentType { roundRobin, knockout, groupsKnockout }
 
 class Tournament {
   final int? id;
@@ -14,6 +14,8 @@ class Tournament {
   final List<String> roulettePool;
   final bool rouletteUnique;
   final bool rouletteRoundUnique;
+  final int groupCount; // groupsKnockout only
+  final int qualifiersPerGroup; // groupsKnockout only
 
   Tournament({
     this.id,
@@ -29,6 +31,8 @@ class Tournament {
     this.roulettePool = const [],
     this.rouletteUnique = true,
     this.rouletteRoundUnique = true,
+    this.groupCount = 0,
+    this.qualifiersPerGroup = 0,
   });
 
   Map<String, dynamic> toMap() {
@@ -46,6 +50,8 @@ class Tournament {
       'roulette_pool': roulettePool.join(','),
       'roulette_unique': rouletteUnique ? 1 : 0,
       'roulette_round_unique': rouletteRoundUnique ? 1 : 0,
+      'group_count': groupCount,
+      'qualifiers_per_group': qualifiersPerGroup,
     };
   }
 
@@ -68,6 +74,8 @@ class Tournament {
       roulettePool: poolStr.trim().isEmpty ? [] : poolStr.split(','),
       rouletteUnique: (map['roulette_unique'] as int? ?? 1) == 1,
       rouletteRoundUnique: (map['roulette_round_unique'] as int? ?? 1) == 1,
+      groupCount: map['group_count'] as int? ?? 0,
+      qualifiersPerGroup: map['qualifiers_per_group'] as int? ?? 0,
     );
   }
 
@@ -85,6 +93,8 @@ class Tournament {
     List<String>? roulettePool,
     bool? rouletteUnique,
     bool? rouletteRoundUnique,
+    int? groupCount,
+    int? qualifiersPerGroup,
   }) {
     return Tournament(
       id: id ?? this.id,
@@ -100,6 +110,8 @@ class Tournament {
       roulettePool: roulettePool ?? this.roulettePool,
       rouletteUnique: rouletteUnique ?? this.rouletteUnique,
       rouletteRoundUnique: rouletteRoundUnique ?? this.rouletteRoundUnique,
+      groupCount: groupCount ?? this.groupCount,
+      qualifiersPerGroup: qualifiersPerGroup ?? this.qualifiersPerGroup,
     );
   }
 }

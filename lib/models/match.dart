@@ -13,6 +13,7 @@ class MatchModel {
   final int? bracketPos; // Match position in the current round (for bracket display)
   final int? nextMatchId; // Next match ID where the winner advances
   final bool? nextMatchIsHome; // Whether the winner is home (true) or away (false) in the next match
+  final int? groupIndex; // Group (0 = A) for a group-stage match; null in a league or knockout
 
   MatchModel({
     this.id,
@@ -27,6 +28,7 @@ class MatchModel {
     this.bracketPos,
     this.nextMatchId,
     this.nextMatchIsHome,
+    this.groupIndex,
   });
 
   Map<String, dynamic> toMap() {
@@ -43,6 +45,7 @@ class MatchModel {
       'bracket_pos': bracketPos,
       'next_match_id': nextMatchId,
       'next_match_is_home': nextMatchIsHome == null ? null : (nextMatchIsHome! ? 1 : 0),
+      'group_index': groupIndex,
     };
   }
 
@@ -62,6 +65,7 @@ class MatchModel {
       nextMatchIsHome: map['next_match_is_home'] == null
           ? null
           : (map['next_match_is_home'] as int) == 1,
+      groupIndex: map['group_index'] as int?,
     );
   }
 
@@ -80,6 +84,7 @@ class MatchModel {
     int? bracketPos,
     int? nextMatchId,
     bool? nextMatchIsHome,
+    int? groupIndex,
   }) {
     return MatchModel(
       id: id ?? this.id,
@@ -94,6 +99,7 @@ class MatchModel {
       bracketPos: bracketPos ?? this.bracketPos,
       nextMatchId: nextMatchId ?? this.nextMatchId,
       nextMatchIsHome: nextMatchIsHome ?? this.nextMatchIsHome,
+      groupIndex: groupIndex ?? this.groupIndex,
     );
   }
 }

@@ -196,7 +196,8 @@ class _EditTournamentScreenState extends State<EditTournamentScreen> {
     final l10n = AppLocalizations.of(context)!;
     final provider = Provider.of<TournamentProvider>(context);
     final players = provider.activeTeams;
-    final isRoundRobin = widget.tournament.type == TournamentType.roundRobin;
+    // Points matter wherever there is a league table (league or group stage)
+    final isRoundRobin = widget.tournament.type != TournamentType.knockout;
 
     return Scaffold(
       backgroundColor: const Color(0xFFFFFCFC),

@@ -1,8 +1,10 @@
 import 'package:fixtura/l10n/app_localizations.dart';
 import '../models/match.dart';
 import '../models/tournament.dart';
+import '../logic/tournament_rules.dart';
 
-/// Display name for a match's round in the current language.
+/// Display name for a match's round in the current language. [type] is the
+/// format the match is played under (see [stageType]).
 ///
 /// Round names are stored in English in the database, so they are rebuilt
 /// here from the round number instead of being shown as stored.
@@ -12,6 +14,9 @@ String localizedRoundName(
   TournamentType type,
   List<MatchModel> allMatches,
 ) {
+  if (match.groupIndex != null) {
+    return '${l10n.groupName(groupLetter(match.groupIndex!))} · ${l10n.round(match.roundNumber)}';
+  }
   if (type == TournamentType.roundRobin) return l10n.round(match.roundNumber);
 
   final lastRound = allMatches.fold<int>(

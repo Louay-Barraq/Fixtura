@@ -60,8 +60,11 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
           ),
         ),
         content: Text(
-          l10n.laterResultWarningBody(
-            localizedRoundName(l10n, clearedMatch, widget.tournamentType, provider.activeMatches),
+          // The cleared match is always a bracket match
+          (widget.match.groupIndex != null
+              ? l10n.laterResultWarningGroupBody
+              : l10n.laterResultWarningBody)(
+            localizedRoundName(l10n, clearedMatch, TournamentType.knockout, provider.activeMatches),
           ),
           style: const TextStyle(
             fontFamily: 'RobotoMono',

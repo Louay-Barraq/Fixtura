@@ -4,6 +4,7 @@ class Team {
   final String name;
   final String? colorHex; // Hex color code for team personalization (e.g. #FF5733)
   final String? assignedTeam; // Assigned real team name if roulette is active (e.g. "Real Madrid")
+  final int? groupIndex; // Group (0 = A) in a groupsKnockout tournament
 
   Team({
     this.id,
@@ -11,6 +12,7 @@ class Team {
     required this.name,
     this.colorHex,
     this.assignedTeam,
+    this.groupIndex,
   });
 
   Map<String, dynamic> toMap() {
@@ -20,6 +22,7 @@ class Team {
       'name': name,
       'color_hex': colorHex,
       'assigned_team': assignedTeam,
+      'group_index': groupIndex,
     };
   }
 
@@ -30,6 +33,7 @@ class Team {
       name: map['name'] as String,
       colorHex: map['color_hex'] as String?,
       assignedTeam: map['assigned_team'] as String?,
+      groupIndex: map['group_index'] as int?,
     );
   }
 
@@ -40,6 +44,7 @@ class Team {
     String? colorHex,
     String? assignedTeam,
     bool clearAssignedTeam = false,
+    int? groupIndex,
   }) {
     return Team(
       id: id ?? this.id,
@@ -47,6 +52,7 @@ class Team {
       name: name ?? this.name,
       colorHex: colorHex ?? this.colorHex,
       assignedTeam: clearAssignedTeam ? null : (assignedTeam ?? this.assignedTeam),
+      groupIndex: groupIndex ?? this.groupIndex,
     );
   }
 }
