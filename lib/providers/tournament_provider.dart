@@ -7,6 +7,15 @@ import '../models/team.dart';
 import '../models/match.dart';
 import '../models/standing.dart';
 
+/// Why an auto draft stopped. [round] and [player] are set when the pool ran
+/// out of teams for that player; otherwise the draft failed for another reason.
+class RouletteDraftError implements Exception {
+  final int? round;
+  final String? player;
+
+  const RouletteDraftError({this.round, this.player});
+}
+
 class TournamentProvider extends ChangeNotifier {
   List<Tournament> _tournaments = [];
   Tournament? _activeTournament;
@@ -429,8 +438,8 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> autoDraftRound(int roundNumber) async {
-    if (_activeTournament == null) return 'No active tournament.';
+  Future<RouletteDraftError?> autoDraftRound(int roundNumber) async {
+    if (_activeTournament == null) return const RouletteDraftError();
 
     _isLoading = true;
     notifyListeners();
@@ -454,10 +463,7 @@ class TournamentProvider extends ChangeNotifier {
 
           if (availableTeams.isEmpty) {
             if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
-              throw StateError(
-                'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
-                'Add more teams to the roulette pool or relax the uniqueness constraints.',
-              );
+              throw RouletteDraftError(round: roundNumber, player: team.name);
             }
             continue;
           }
@@ -481,15 +487,15 @@ class TournamentProvider extends ChangeNotifier {
       return null;
     } catch (e) {
       debugPrint("Error auto drafting round $roundNumber: $e");
-      return e is StateError ? e.message : 'Error auto drafting round: $e';
+      return e is RouletteDraftError ? e : const RouletteDraftError();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<String?> autoDraftAllRounds() async {
-    if (_activeTournament == null) return 'No active tournament.';
+  Future<RouletteDraftError?> autoDraftAllRounds() async {
+    if (_activeTournament == null) return const RouletteDraftError();
     
     _isLoading = true;
     notifyListeners();
@@ -514,10 +520,7 @@ class TournamentProvider extends ChangeNotifier {
             );
             if (availableTeams.isEmpty) {
               if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
-                throw StateError(
-                  'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
-                  'Add more teams to the roulette pool or relax the uniqueness constraints.',
-                );
+                throw RouletteDraftError(round: roundNumber, player: team.name);
               }
               continue;
             }
@@ -543,7 +546,7 @@ class TournamentProvider extends ChangeNotifier {
       return null;
     } catch (e) {
       debugPrint("Error in auto draft: $e");
-      return e is StateError ? e.message : 'Error auto drafting all rounds: $e';
+      return e is RouletteDraftError ? e : const RouletteDraftError();
     } finally {
       _isLoading = false;
       notifyListeners();

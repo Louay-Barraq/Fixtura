@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import '../models/match.dart';
@@ -65,10 +66,10 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
           return Scaffold(
             backgroundColor: const Color(0xFFFFFCFC),
             appBar: AppBar(backgroundColor: Colors.transparent, elevation: 0),
-            body: const Center(
+            body: Center(
               child: Text(
-                'Tournament not found.',
-                style: TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
+                AppLocalizations.of(context)!.tournamentNotFound,
+                style: const TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
               ),
             ),
           );
@@ -193,10 +194,10 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
     TournamentProvider provider,
   ) {
     if (matches.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No matches generated yet.',
-          style: TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
+          AppLocalizations.of(context)!.noMatchesYet,
+          style: const TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
         ),
       );
     }
@@ -236,10 +237,10 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
         // List of Matches in Selected Round
         Expanded(
           child: filteredMatches.isEmpty
-              ? const Center(
+              ? Center(
                   child: Text(
-                    'No matches in this round.',
-                    style: TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
+                    AppLocalizations.of(context)!.noMatchesInRound,
+                    style: const TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
                   ),
                 )
               : ListView.builder(
@@ -280,10 +281,10 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
     final List<Standing> standings = provider.calculateStandings();
 
     if (standings.isEmpty) {
-      return const Center(
+      return Center(
         child: Text(
-          'No standings available.',
-          style: TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
+          AppLocalizations.of(context)!.noStandings,
+          style: const TextStyle(fontFamily: 'RobotoMono', color: Colors.black),
         ),
       );
     }
@@ -321,6 +322,14 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
         ],
       ),
     );
+  }
+
+  String _draftErrorMessage(RouletteDraftError error) {
+    final l10n = AppLocalizations.of(context)!;
+    if (error.round != null && error.player != null) {
+      return l10n.notEnoughRouletteTeams(error.round!, error.player!);
+    }
+    return l10n.autoDraftFailed;
   }
 
   // --- ROULETTE TAB VIEW ---
@@ -383,8 +392,8 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                 // Current Player Dropdown Selector
                 if (teams.isNotEmpty) ...[
                   DropdownTile(
-                    title: 'Current Player',
-                    subtitle: 'Select active player to spin for',
+                    title: AppLocalizations.of(context)!.currentPlayer,
+                    subtitle: AppLocalizations.of(context)!.currentPlayerSubtitle,
                     initialValue: selectedPlayer.name,
                     options: teams.map((t) => t.name).toList(),
                     onChanged: (val) {
@@ -415,7 +424,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                 const Gap(24),
 
                 // PLAYERS STATUS SECTION
-                const ShortSectionHeader(title: 'PLAYERS STATUS'),
+                ShortSectionHeader(title: AppLocalizations.of(context)!.playersStatus),
                 const Gap(12),
 
                 ...teams.map((player) {
@@ -424,7 +433,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                     padding: const EdgeInsets.only(bottom: 8.0),
                     child: PlayerStatusTile(
                       playerName: player.name,
-                      teamName: assigned ?? 'NOT DRAFTED',
+                      teamName: assigned ?? AppLocalizations.of(context)!.notDrafted,
                     ),
                   );
                 }),
@@ -443,7 +452,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                   if (error != null && mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(error),
+                        content: Text(_draftErrorMessage(error)),
                         backgroundColor: const Color(0xFFD71212),
                       ),
                     );
@@ -456,7 +465,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                   if (error != null && mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text(error),
+                        content: Text(_draftErrorMessage(error)),
                         backgroundColor: const Color(0xFFD71212),
                       ),
                     );

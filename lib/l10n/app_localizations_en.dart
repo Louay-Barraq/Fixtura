@@ -309,4 +309,241 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get laterResultWarningContinue => 'CONTINUE';
+
+  @override
+  String get knockoutDrawNotAllowed =>
+      'A draw isn\'t allowed in a knockout match. Pick the penalty shootout winner.';
+
+  @override
+  String get penaltyShootoutWinner => 'PENALTY SHOOTOUT WINNER';
+
+  @override
+  String get tbd => 'TBD';
+
+  @override
+  String get bye => 'BYE';
+
+  @override
+  String get notDrafted => 'NOT DRAFTED';
+
+  @override
+  String get currentPlayer => 'Current Player';
+
+  @override
+  String get currentPlayerSubtitle => 'Select active player to spin for';
+
+  @override
+  String get playersStatus => 'PLAYERS STATUS';
+
+  @override
+  String get roundChip => 'ROUND';
+
+  @override
+  String get rouletteUpper => 'ROULETTE';
+
+  @override
+  String get winPts => 'Win Pts';
+
+  @override
+  String get drawPts => 'Draw Pts';
+
+  @override
+  String get lossPts => 'Loss Pts';
+
+  @override
+  String couldNotOpenLink(String url) {
+    return 'Could not open $url';
+  }
+
+  @override
+  String get allDataCleared => 'All data has been cleared.';
+
+  @override
+  String get tournamentNotFound => 'Tournament not found.';
+
+  @override
+  String get noMatchesYet => 'No matches generated yet.';
+
+  @override
+  String get noMatchesInRound => 'No matches in this round.';
+
+  @override
+  String get noStandings => 'No standings available.';
+
+  @override
+  String get finalRound => 'Final';
+
+  @override
+  String get semiFinals => 'Semi-finals';
+
+  @override
+  String get quarterFinals => 'Quarter-finals';
+
+  @override
+  String roundOf(int count) {
+    return 'Round of $count';
+  }
+
+  @override
+  String notEnoughRouletteTeams(int round, String player) {
+    return 'Not enough roulette teams to draft round $round for $player. Add teams to the pool or turn off a uniqueness rule.';
+  }
+
+  @override
+  String get autoDraftFailed => 'The auto draft couldn\'t be completed.';
+
+  @override
+  String rouletteDistinctNeedsMore(int needed, int have) {
+    return 'You need at least $needed teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have $have).';
+  }
+
+  @override
+  String rouletteUniqueNeedsMore(int needed, int have) {
+    return 'You need at least $needed teams in MANAGE TEAMS so every player gets a unique team (you have $have).';
+  }
+
+  @override
+  String get playerHint => 'Enter player name (e.g. John, David)...';
+
+  @override
+  String get teamHint => 'Enter team name (e.g. PSG, RMA, FCB)...';
+
+  @override
+  String get onboardingTitle1 => 'WELCOME TO FIXTURA';
+
+  @override
+  String get onboardingBody1 =>
+      'Host and manage local tournaments with your friends: round robin leagues, knockout brackets, and more. All offline, all yours.';
+
+  @override
+  String get onboardingTitle2 => 'PLAYERS & TEAMS';
+
+  @override
+  String get onboardingBody2 =>
+      'Players are the real people competing: you, your friends.\n\nTeams are the clubs they play as like PSG, Real Madrid, Barcelona, ...\n\nAdd your players first, then build your team pool.';
+
+  @override
+  String get onboardingTitle3 => 'SPIN THE ROULETTE';
+
+  @override
+  String get onboardingBody3 =>
+      'Can\'t decide who plays as what? Enable Team Roulette and let the wheel pick for you.\n\nSet it to unique so no two players get the same team, or distinct across rounds so nobody repeats.';
+
+  @override
+  String get onboardingTitle4 => 'TRACK EVERY GAME';
+
+  @override
+  String get onboardingBody4 =>
+      'Tap any match to enter the score. Standings update automatically: the points, the goal difference, everything.\n\nSwitch between rounds using the chips at the top.';
+
+  @override
+  String get onboardingTitle5 => 'YOU\'RE ALL SET';
+
+  @override
+  String get onboardingBody5 =>
+      'Create your first tournament from the home screen, or spin a quick roulette for fun.\n\nLet\'s go!';
+
+  @override
+  String get groups => 'Groups';
+
+  @override
+  String get groupsPlusKnockout => '+ Knockout';
+
+  @override
+  String get groupSettings => 'GROUP STAGE SETTINGS';
+
+  @override
+  String get numberOfGroups => 'Groups';
+
+  @override
+  String get numberOfGroupsSubtitle => 'How many groups to split players into';
+
+  @override
+  String get qualifiersPerGroup => 'Qualifiers';
+
+  @override
+  String get qualifiersPerGroupSubtitle =>
+      'Players per group who reach the knockouts';
+
+  @override
+  String groupName(String letter) {
+    return 'GROUP $letter';
+  }
+
+  @override
+  String get groupStage => 'Group stage';
+
+  @override
+  String groupsNeedMorePlayers(int needed, int groups) {
+    return 'You need at least $needed players for $groups groups.';
+  }
+
+  @override
+  String get knockoutWaitingForGroups =>
+      'Knockout spots fill in once every group match is played.';
+
+  @override
+  String laterResultWarningGroupBody(String round) {
+    return 'Changing this score changes who qualifies from the groups. Knockout results from the $round onward will be cleared and need to be entered again.';
+  }
+
+  @override
+  String get shareResults => 'Share results';
+
+  @override
+  String get latestResults => 'LATEST RESULTS';
+
+  @override
+  String get upcomingMatches => 'UP NEXT';
+
+  @override
+  String championLine(String name) {
+    return '🏆 Champion: $name';
+  }
+
+  @override
+  String get madeWithFixtura => 'Made with Fixtura';
+
+  @override
+  String get pointsShort => 'pts';
+
+  @override
+  String get dataSection => 'BACKUP';
+
+  @override
+  String get exportBackup => 'Export Backup';
+
+  @override
+  String get exportBackupSubtitle => 'Save every tournament to a file';
+
+  @override
+  String get importBackup => 'Import Backup';
+
+  @override
+  String get importBackupSubtitle => 'Restore tournaments from a backup file';
+
+  @override
+  String backupImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count tournaments imported.',
+      one: '1 tournament imported.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupNothingNew =>
+      'Everything in this backup is already in the app.';
+
+  @override
+  String get backupInvalid => 'This file isn\'t a valid Fixtura backup.';
+
+  @override
+  String get backupExportFailed => 'Couldn\'t create the backup.';
+
+  @override
+  String get noTournamentsToExport =>
+      'There are no tournaments to back up yet.';
 }

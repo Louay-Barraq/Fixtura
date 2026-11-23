@@ -33,7 +33,7 @@ class SettingsScreen extends StatelessWidget {
       if (!launched && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not open $urlString'),
+            content: Text(AppLocalizations.of(context)!.couldNotOpenLink(urlString)),
             backgroundColor: const Color(0xFFD71212),
           ),
         );
@@ -42,7 +42,7 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening link: $e'),
+            content: Text(AppLocalizations.of(context)!.couldNotOpenLink(urlString)),
             backgroundColor: const Color(0xFFD71212),
           ),
         );
@@ -98,8 +98,8 @@ class SettingsScreen extends StatelessWidget {
               await provider.clearAllTournaments();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All data has been cleared.'),
+                  SnackBar(
+                    content: Text(l10n.allDataCleared),
                     backgroundColor: Colors.black,
                   ),
                 );

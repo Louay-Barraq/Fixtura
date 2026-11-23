@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import 'package:gap/gap.dart';
 import '../models/match.dart';
 import '../models/team.dart';
@@ -31,8 +32,9 @@ class CustomMatchCard extends StatelessWidget {
     final isTbdMatch = (match.homeTeamId == null || match.awayTeamId == null) && !isByeMatch;
     final isPlayed = match.isPlayed;
 
-    final homePlayerName = homeTeam?.name ?? (isByeMatch && match.homeTeamId == null ? 'BYE' : 'TBD');
-    final awayPlayerName = awayTeam?.name ?? (isByeMatch && match.awayTeamId == null ? 'BYE' : 'TBD');
+    final l10n = AppLocalizations.of(context)!;
+    final homePlayerName = homeTeam?.name ?? (isByeMatch && match.homeTeamId == null ? l10n.bye : l10n.tbd);
+    final awayPlayerName = awayTeam?.name ?? (isByeMatch && match.awayTeamId == null ? l10n.bye : l10n.tbd);
 
     final homeAssignedTeam = assignedTeamResolver?.call(homeTeam, roundNumber) ?? homeTeam?.assignedTeam;
     final awayAssignedTeam = assignedTeamResolver?.call(awayTeam, roundNumber) ?? awayTeam?.assignedTeam;

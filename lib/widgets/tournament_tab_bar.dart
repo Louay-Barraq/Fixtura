@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 
 enum TournamentTab { fixtures, standings, roulette }
 
@@ -60,14 +61,14 @@ class _TournamentTabBarState extends State<TournamentTabBar> {
                   children: [
                     Expanded(
                       child: _buildTabButton(
-                        label: 'FIXTURES',
+                        label: AppLocalizations.of(context)!.fixtures,
                         tab: TournamentTab.fixtures,
                       ),
                     ),
                     const SizedBox(width: 12),
                     Expanded(
                       child: _buildTabButton(
-                        label: 'STANDINGS',
+                        label: AppLocalizations.of(context)!.standings,
                         tab: TournamentTab.standings,
                       ),
                     ),
@@ -79,7 +80,7 @@ class _TournamentTabBarState extends State<TournamentTabBar> {
                 FractionallySizedBox(
                   widthFactor: 0.5,
                   child: _buildTabButton(
-                    label: 'ROULETTE',
+                    label: AppLocalizations.of(context)!.rouletteUpper,
                     tab: TournamentTab.roulette,
                   ),
                 ),
@@ -90,14 +91,14 @@ class _TournamentTabBarState extends State<TournamentTabBar> {
                 // Horizontal Row: FIXTURES & STANDINGS only
                 Expanded(
                   child: _buildTabButton(
-                    label: 'FIXTURES',
+                    label: AppLocalizations.of(context)!.fixtures,
                     tab: TournamentTab.fixtures,
                   ),
                 ),
                 const SizedBox(width: 12),
                 Expanded(
                   child: _buildTabButton(
-                    label: 'STANDINGS',
+                    label: AppLocalizations.of(context)!.standings,
                     tab: TournamentTab.standings,
                   ),
                 ),

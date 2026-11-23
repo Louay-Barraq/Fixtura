@@ -17,43 +17,38 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   int _currentPage = 0;
   static const int _totalSteps = 5;
 
-  final List<OnboardingStepData> _steps = const [
-    OnboardingStepData(
-      stepNumber: 1,
-      title: 'WELCOME TO FIXTURA',
-      body:
-          'Host and manage local tournaments with your friends: round robin leagues, knockout brackets, and more. All offline, all yours.',
-      iconType: StepIconType.trophy,
-    ),
-    OnboardingStepData(
-      stepNumber: 2,
-      title: 'PLAYERS & TEAMS',
-      body:
-          'Players are the real people competing: you, your friends.\n\nTeams are the clubs they play as like PSG, Real Madrid, Barcelona, ... \n\nAdd your players first, then build your team pool.',
-      iconType: StepIconType.playersAndTeams,
-    ),
-    OnboardingStepData(
-      stepNumber: 3,
-      title: 'SPIN THE ROULETTE',
-      body:
-          'Can\'t decide who plays as what? Enable Team Roulette and let the wheel pick for you.\n\nSet it to unique so no two players get the same team, or distinct across rounds so nobody repeats.',
-      iconType: StepIconType.roulette,
-    ),
-    OnboardingStepData(
-      stepNumber: 4,
-      title: 'TRACK EVERY GAME',
-      body:
-          'Tap any match to enter the score. Standings update automatically the points, the goal difference, everything.\n\nSwitch between rounds using the chips at the top.',
-      iconType: StepIconType.fixtures,
-    ),
-    OnboardingStepData(
-      stepNumber: 5,
-      title: 'YOU\'RE ALL SET',
-      body:
-          'Create your first tournament from the home screen, or spin a quick roulette for fun.\n\nLet\'s go!',
-      iconType: StepIconType.ready,
-    ),
-  ];
+  List<OnboardingStepData> _buildSteps(AppLocalizations l10n) => [
+        OnboardingStepData(
+          stepNumber: 1,
+          title: l10n.onboardingTitle1,
+          body: l10n.onboardingBody1,
+          iconType: StepIconType.trophy,
+        ),
+        OnboardingStepData(
+          stepNumber: 2,
+          title: l10n.onboardingTitle2,
+          body: l10n.onboardingBody2,
+          iconType: StepIconType.playersAndTeams,
+        ),
+        OnboardingStepData(
+          stepNumber: 3,
+          title: l10n.onboardingTitle3,
+          body: l10n.onboardingBody3,
+          iconType: StepIconType.roulette,
+        ),
+        OnboardingStepData(
+          stepNumber: 4,
+          title: l10n.onboardingTitle4,
+          body: l10n.onboardingBody4,
+          iconType: StepIconType.fixtures,
+        ),
+        OnboardingStepData(
+          stepNumber: 5,
+          title: l10n.onboardingTitle5,
+          body: l10n.onboardingBody5,
+          iconType: StepIconType.ready,
+        ),
+      ];
 
   Future<void> _completeOnboarding() async {
     if (widget.isReplay) {
@@ -92,6 +87,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final steps = _buildSteps(l10n);
     final double progress = (_currentPage + 1) / _totalSteps;
     final bool isLastPage = _currentPage == _totalSteps - 1;
 
@@ -188,9 +184,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     _currentPage = index;
                   });
                 },
-                itemCount: _steps.length,
+                itemCount: steps.length,
                 itemBuilder: (context, index) {
-                  final step = _steps[index];
+                  final step = steps[index];
                   return _OnboardingStepContent(step: step);
                 },
               ),

@@ -108,7 +108,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'You need at least ${_estimatedRoundCount()} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have ${_teamNames.length}).',
+              l10n.rouletteDistinctNeedsMore(_estimatedRoundCount(), _teamNames.length),
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
@@ -120,7 +120,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'You need at least ${_playerNames.length} teams in MANAGE TEAMS to ensure unique assignments per player (you have ${_teamNames.length}).',
+              l10n.rouletteUniqueNeedsMore(_playerNames.length, _teamNames.length),
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
@@ -335,7 +335,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Players',
-                        hintText: 'Enter player name (e.g. John, David)...',
+                        hintText: l10n.playerHint,
                         onTagsChanged: (players) {
                           setState(() {
                             _playerNames = List.from(players);
@@ -349,7 +349,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Teams',
-                        hintText: 'Enter team name (e.g. PSG, RMA, FCB)...',
+                        hintText: l10n.teamHint,
                         onTagsChanged: (teams) {
                           setState(() {
                             _teamNames = List.from(teams);

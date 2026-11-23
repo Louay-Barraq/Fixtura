@@ -6,6 +6,7 @@ import '../models/match.dart';
 import '../models/team.dart';
 import '../models/tournament.dart';
 import '../providers/tournament_provider.dart';
+import '../utils/round_names.dart';
 import 'short_section_header.dart';
 import 'square_button.dart';
 
@@ -59,7 +60,9 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
           ),
         ),
         content: Text(
-          l10n.laterResultWarningBody(clearedMatch.roundName),
+          l10n.laterResultWarningBody(
+            localizedRoundName(l10n, clearedMatch, widget.tournamentType, provider.activeMatches),
+          ),
           style: const TextStyle(
             fontFamily: 'RobotoMono',
             fontSize: 13,
@@ -99,9 +102,9 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
     if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
       if (_penaltyWinnerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A draw is not allowed in Knockouts. Please select a penalty winner.'),
-            backgroundColor: Color(0xFFD71212),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.knockoutDrawNotAllowed),
+            backgroundColor: const Color(0xFFD71212),
           ),
         );
         return;
@@ -137,8 +140,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final homeName = widget.homeTeam?.name ?? 'TBD';
-    final awayName = widget.awayTeam?.name ?? 'TBD';
+    final l10n = AppLocalizations.of(context)!;
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    final homeName = widget.homeTeam?.name ?? l10n.tbd;
+    final awayName = widget.awayTeam?.name ?? l10n.tbd;
     final isKnockout = widget.tournamentType == TournamentType.knockout;
     final isTie = _homeScore == _awayScore;
 
@@ -177,7 +182,7 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
             // Header Title
             Center(
               child: ShortSectionHeader(
-                title: widget.match.roundName.toUpperCase(),
+                title: localizedRoundName(l10n, widget.match, widget.tournamentType, provider.activeMatches).toUpperCase(),
               ),
             ),
             const Gap(24),
@@ -269,9 +274,9 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'PENALTY SHOOTOUT WINNER',
-                      style: TextStyle(
+                    Text(
+                      l10n.penaltyShootoutWinner,
+                      style: const TextStyle(
                         fontFamily: 'BebasNeue',
                         fontSize: 16,
                         color: Color(0xFFD71212),

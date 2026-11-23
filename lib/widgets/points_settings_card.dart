@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '/widgets/square_button.dart';
 
 class PointsSettingsCard extends StatefulWidget {
@@ -73,7 +74,7 @@ class _PointsSettingsCardState extends State<PointsSettingsCard> {
             mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
               _buildPointCounter(
-                label: 'Win Pts',
+                label: AppLocalizations.of(context)!.winPts,
                 value: winPoints,
                 onDecrement: () {
                   if (winPoints > 0) {
@@ -87,7 +88,7 @@ class _PointsSettingsCardState extends State<PointsSettingsCard> {
                 },
               ),
               _buildPointCounter(
-                label: 'Draw Pts',
+                label: AppLocalizations.of(context)!.drawPts,
                 value: drawPoints,
                 onDecrement: () {
                   if (drawPoints > 0) {
@@ -101,7 +102,7 @@ class _PointsSettingsCardState extends State<PointsSettingsCard> {
                 },
               ),
               _buildPointCounter(
-                label: 'Loss Pts',
+                label: AppLocalizations.of(context)!.lossPts,
                 value: lossPoints,
                 onDecrement: () {
                   if (lossPoints > 0) {

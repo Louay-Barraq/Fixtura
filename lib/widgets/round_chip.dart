@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 
 class RoundChip extends StatelessWidget {
   final String label;
@@ -46,7 +47,7 @@ class RoundChip extends StatelessWidget {
                 letterSpacing: 1,
                 color: isSelected ? Colors.white : Colors.black,
               ),
-              child: const Text('ROUND'),
+              child: Text(AppLocalizations.of(context)!.roundChip),
             ),
             const SizedBox(width: 8),
             AnimatedContainer(
