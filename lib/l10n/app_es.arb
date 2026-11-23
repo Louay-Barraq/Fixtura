@@ -163,5 +163,9 @@
   "backupNothingNew": "Todo lo de esta copia ya está en la app.",
   "backupInvalid": "Este archivo no es una copia de Fixtura válida.",
   "backupExportFailed": "No se pudo crear la copia.",
-  "noTournamentsToExport": "Todavía no hay torneos que guardar."
+  "noTournamentsToExport": "Todavía no hay torneos que guardar.",
+  "openTournament": "Abrir torneo",
+  "resetScore": "BORRAR RESULTADO",
+  "saveResult": "GUARDAR RESULTADO",
+  "selectedTeam": "EQUIPO ELEGIDO"
 }

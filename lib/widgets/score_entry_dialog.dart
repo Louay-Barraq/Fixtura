@@ -338,10 +338,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                             ),
                           ],
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            'RESET SCORE',
-                            style: TextStyle(
+                            l10n.resetScore,
+                            style: const TextStyle(
                               fontFamily: 'BebasNeue',
                               fontSize: 18,
                               color: Color(0xFFD71212),
@@ -372,10 +372,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                           ),
                         ],
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'SAVE RESULT',
-                          style: TextStyle(
+                          l10n.saveResult,
+                          style: const TextStyle(
                             fontFamily: 'BebasNeue',
                             fontSize: 20,
                             color: Colors.white,

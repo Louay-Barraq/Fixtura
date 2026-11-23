@@ -266,5 +266,9 @@
   "backupNothingNew": "Everything in this backup is already in the app.",
   "backupInvalid": "This file isn't a valid Fixtura backup.",
   "backupExportFailed": "Couldn't create the backup.",
-  "noTournamentsToExport": "There are no tournaments to back up yet."
+  "noTournamentsToExport": "There are no tournaments to back up yet.",
+  "openTournament": "Open Tournament",
+  "resetScore": "RESET SCORE",
+  "saveResult": "SAVE RESULT",
+  "selectedTeam": "SELECTED TEAM"
 }

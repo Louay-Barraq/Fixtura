@@ -546,4 +546,16 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get noTournamentsToExport =>
       'There are no tournaments to back up yet.';
+
+  @override
+  String get openTournament => 'Open Tournament';
+
+  @override
+  String get resetScore => 'RESET SCORE';
+
+  @override
+  String get saveResult => 'SAVE RESULT';
+
+  @override
+  String get selectedTeam => 'SELECTED TEAM';
 }

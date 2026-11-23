@@ -1085,6 +1085,30 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'There are no tournaments to back up yet.'**
   String get noTournamentsToExport;
+
+  /// No description provided for @openTournament.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Tournament'**
+  String get openTournament;
+
+  /// No description provided for @resetScore.
+  ///
+  /// In en, this message translates to:
+  /// **'RESET SCORE'**
+  String get resetScore;
+
+  /// No description provided for @saveResult.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE RESULT'**
+  String get saveResult;
+
+  /// No description provided for @selectedTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECTED TEAM'**
+  String get selectedTeam;
 }
 
 class _AppLocalizationsDelegate

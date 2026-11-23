@@ -552,4 +552,16 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get noTournamentsToExport => 'Todavía no hay torneos que guardar.';
+
+  @override
+  String get openTournament => 'Abrir torneo';
+
+  @override
+  String get resetScore => 'BORRAR RESULTADO';
+
+  @override
+  String get saveResult => 'GUARDAR RESULTADO';
+
+  @override
+  String get selectedTeam => 'EQUIPO ELEGIDO';
 }

@@ -555,4 +555,16 @@ class AppLocalizationsFr extends AppLocalizations {
   @override
   String get noTournamentsToExport =>
       'Aucun tournoi à sauvegarder pour l\'instant.';
+
+  @override
+  String get openTournament => 'Ouvrir le tournoi';
+
+  @override
+  String get resetScore => 'EFFACER LE SCORE';
+
+  @override
+  String get saveResult => 'ENREGISTRER';
+
+  @override
+  String get selectedTeam => 'ÉQUIPE TIRÉE';
 }

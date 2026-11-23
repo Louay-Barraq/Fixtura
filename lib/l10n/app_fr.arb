@@ -163,5 +163,9 @@
   "backupNothingNew": "Tout le contenu de cette sauvegarde est déjà dans l'app.",
   "backupInvalid": "Ce fichier n'est pas une sauvegarde Fixtura valide.",
   "backupExportFailed": "Impossible de créer la sauvegarde.",
-  "noTournamentsToExport": "Aucun tournoi à sauvegarder pour l'instant."
+  "noTournamentsToExport": "Aucun tournoi à sauvegarder pour l'instant.",
+  "openTournament": "Ouvrir le tournoi",
+  "resetScore": "EFFACER LE SCORE",
+  "saveResult": "ENREGISTRER",
+  "selectedTeam": "ÉQUIPE TIRÉE"
 }

@@ -163,5 +163,9 @@
   "backupNothingNew": "كل ما في هذه النسخة موجود بالفعل في التطبيق.",
   "backupInvalid": "هذا الملف ليس نسخة احتياطية صالحة من Fixtura.",
   "backupExportFailed": "تعذّر إنشاء النسخة الاحتياطية.",
-  "noTournamentsToExport": "لا توجد بطولات لنسخها بعد."
+  "noTournamentsToExport": "لا توجد بطولات لنسخها بعد.",
+  "openTournament": "فتح البطولة",
+  "resetScore": "مسح النتيجة",
+  "saveResult": "حفظ النتيجة",
+  "selectedTeam": "الفريق المختار"
 }

@@ -545,4 +545,16 @@ class AppLocalizationsAr extends AppLocalizations {
 
   @override
   String get noTournamentsToExport => 'لا توجد بطولات لنسخها بعد.';
+
+  @override
+  String get openTournament => 'فتح البطولة';
+
+  @override
+  String get resetScore => 'مسح النتيجة';
+
+  @override
+  String get saveResult => 'حفظ النتيجة';
+
+  @override
+  String get selectedTeam => 'الفريق المختار';
 }

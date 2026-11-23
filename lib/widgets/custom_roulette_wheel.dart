@@ -1,5 +1,6 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 
 class CustomRouletteWheel extends StatefulWidget {
   final List<String> items;
@@ -96,9 +97,9 @@ class _CustomCustomRouletteWheelState extends State<CustomRouletteWheel>
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              const Text(
-                'SELECTED TEAM',
-                style: TextStyle(
+              Text(
+                AppLocalizations.of(context)!.selectedTeam,
+                style: const TextStyle(
                   fontFamily: 'BebasNeue',
                   fontSize: 22,
                   letterSpacing: 1.2,
