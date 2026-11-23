@@ -306,6 +306,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                               ShortSectionHeader(title: l10n.groupSettings),
                               const Gap(12),
                               DropdownTile(
+                                key: const ValueKey('groupCount'),
                                 title: l10n.numberOfGroups,
                                 subtitle: l10n.numberOfGroupsSubtitle,
                                 initialValue: '$_groupCount',
@@ -316,6 +317,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                               ),
                               const Gap(16),
                               DropdownTile(
+                                key: const ValueKey('qualifiers'),
                                 title: l10n.qualifiersPerGroup,
                                 subtitle: l10n.qualifiersPerGroupSubtitle,
                                 initialValue: '$_qualifiersPerGroup',
@@ -329,6 +331,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                             ShortSectionHeader(title: l10n.leagueSettings),
                             const Gap(12),
                             DropdownTile(
+                              key: const ValueKey('legs'),
                               title: l10n.legs,
                               subtitle: l10n.legsSubtitle,
                               initialValue: _legs == 1
