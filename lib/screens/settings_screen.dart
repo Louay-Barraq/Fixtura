@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:file_picker/file_picker.dart';
@@ -60,10 +59,13 @@ class SettingsScreen extends StatelessWidget {
 
   // ignore: unused_element
   void _shareApp(BuildContext context) {
-    Share.share(
-      'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
-      subject: 'Fixtura — Offline Tournament Manager',
-      sharePositionOrigin: shareOrigin(context),
+    SharePlus.instance.share(
+      ShareParams(
+        text:
+            'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
+        subject: 'Fixtura — Offline Tournament Manager',
+        sharePositionOrigin: shareOrigin(context),
+      ),
     );
   }
 
@@ -90,10 +92,12 @@ class SettingsScreen extends StatelessWidget {
       final dir = await getTemporaryDirectory();
       final file = File(p.join(dir.path, 'fixtura-backup-$date.json'));
       await file.writeAsString(json);
-      await Share.shareXFiles(
-        [XFile(file.path, mimeType: 'application/json')],
-        subject: 'Fixtura backup $date',
-        sharePositionOrigin: origin,
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: 'Fixtura backup $date',
+          sharePositionOrigin: origin,
+        ),
       );
     } catch (e) {
       debugPrint('Backup export failed: $e');
@@ -104,13 +108,12 @@ class SettingsScreen extends StatelessWidget {
   Future<void> _importBackup(BuildContext context, AppLocalizations l10n) async {
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     try {
-      final picked = await FilePicker.pickFiles(withData: true);
-      final file = picked?.files.single;
-      if (file == null) return;
-      final bytes = file.bytes ?? (file.path != null ? await File(file.path!).readAsBytes() : null);
-      if (bytes == null) throw const InvalidBackupException('empty file');
+      final picked = await FilePicker.pickFiles();
+      if (picked.isEmpty) return;
+      // xFile reads both plain paths and Android content:// URIs
+      final source = await picked.single.xFile.readAsString();
 
-      final count = await BackupService().importJson(utf8.decode(bytes));
+      final count = await BackupService().importJson(source);
       await provider.loadAllTournaments();
       if (!context.mounted) return;
       _showMessage(context, count == 0 ? l10n.backupNothingNew : l10n.backupImported(count));

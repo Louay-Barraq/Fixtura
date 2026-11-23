@@ -137,15 +137,17 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                         child: Builder(
                           builder: (buttonContext) => CircleIconButton(
                             icon: Icons.share_rounded,
-                            onTap: () => Share.share(
-                              buildShareText(
-                                l10n: AppLocalizations.of(context)!,
-                                tournament: tournament,
-                                teams: teams,
-                                matches: matches,
+                            onTap: () => SharePlus.instance.share(
+                              ShareParams(
+                                text: buildShareText(
+                                  l10n: AppLocalizations.of(context)!,
+                                  tournament: tournament,
+                                  teams: teams,
+                                  matches: matches,
+                                ),
+                                subject: tournament.name,
+                                sharePositionOrigin: shareOrigin(buttonContext),
                               ),
-                              subject: tournament.name,
-                              sharePositionOrigin: shareOrigin(buttonContext),
                             ),
                           ),
                         ),
