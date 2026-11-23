@@ -107,5 +107,168 @@
   "playerNames": "PLAYER NAMES",
   "editPlayerHint": "Edit player name",
   "tournamentUpdatedSuccess": "Tournament updated successfully!",
-  "delete": "DELETE"
+  "delete": "DELETE",
+  "laterResultWarningTitle": "CLEAR LATER RESULT?",
+  "laterResultWarningBody": "Changing this score will clear the result of the {round} and any rounds after it. You will need to enter them again.",
+  "@laterResultWarningBody": {
+    "placeholders": {
+      "round": {
+        "type": "String"
+      }
+    }
+  },
+  "laterResultWarningContinue": "CONTINUE",
+  "knockoutDrawNotAllowed": "A draw isn't allowed in a knockout match. Pick the penalty shootout winner.",
+  "penaltyShootoutWinner": "PENALTY SHOOTOUT WINNER",
+  "tbd": "TBD",
+  "bye": "BYE",
+  "notDrafted": "NOT DRAFTED",
+  "currentPlayer": "Current Player",
+  "currentPlayerSubtitle": "Select active player to spin for",
+  "playersStatus": "PLAYERS STATUS",
+  "roundChip": "ROUND",
+  "rouletteUpper": "ROULETTE",
+  "winPts": "Win Pts",
+  "drawPts": "Draw Pts",
+  "lossPts": "Loss Pts",
+  "couldNotOpenLink": "Could not open {url}",
+  "@couldNotOpenLink": {
+    "placeholders": {
+      "url": {
+        "type": "String"
+      }
+    }
+  },
+  "allDataCleared": "All data has been cleared.",
+  "tournamentNotFound": "Tournament not found.",
+  "noMatchesYet": "No matches generated yet.",
+  "noMatchesInRound": "No matches in this round.",
+  "noStandings": "No standings available.",
+  "finalRound": "Final",
+  "semiFinals": "Semi-finals",
+  "quarterFinals": "Quarter-finals",
+  "roundOf": "Round of {count}",
+  "@roundOf": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "notEnoughRouletteTeams": "Not enough roulette teams to draft round {round} for {player}. Add teams to the pool or turn off a uniqueness rule.",
+  "@notEnoughRouletteTeams": {
+    "placeholders": {
+      "round": {
+        "type": "int"
+      },
+      "player": {
+        "type": "String"
+      }
+    }
+  },
+  "autoDraftFailed": "The auto draft couldn't be completed.",
+  "rouletteDistinctNeedsMore": "You need at least {needed} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have {have}).",
+  "@rouletteDistinctNeedsMore": {
+    "placeholders": {
+      "needed": {
+        "type": "int"
+      },
+      "have": {
+        "type": "int"
+      }
+    }
+  },
+  "rouletteUniqueNeedsMore": "You need at least {needed} teams in MANAGE TEAMS so every player gets a unique team (you have {have}).",
+  "@rouletteUniqueNeedsMore": {
+    "placeholders": {
+      "needed": {
+        "type": "int"
+      },
+      "have": {
+        "type": "int"
+      }
+    }
+  },
+  "playerHint": "Enter player name (e.g. John, David)...",
+  "teamHint": "Enter team name (e.g. PSG, RMA, FCB)...",
+  "onboardingTitle1": "WELCOME TO FIXTURA",
+  "onboardingBody1": "Host and manage local tournaments with your friends: round robin leagues, knockout brackets, and more. All offline, all yours.",
+  "onboardingTitle2": "PLAYERS & TEAMS",
+  "onboardingBody2": "Players are the real people competing: you, your friends.\n\nTeams are the clubs they play as like PSG, Real Madrid, Barcelona, ...\n\nAdd your players first, then build your team pool.",
+  "onboardingTitle3": "SPIN THE ROULETTE",
+  "onboardingBody3": "Can't decide who plays as what? Enable Team Roulette and let the wheel pick for you.\n\nSet it to unique so no two players get the same team, or distinct across rounds so nobody repeats.",
+  "onboardingTitle4": "TRACK EVERY GAME",
+  "onboardingBody4": "Tap any match to enter the score. Standings update automatically: the points, the goal difference, everything.\n\nSwitch between rounds using the chips at the top.",
+  "onboardingTitle5": "YOU'RE ALL SET",
+  "onboardingBody5": "Create your first tournament from the home screen, or spin a quick roulette for fun.\n\nLet's go!",
+  "groups": "Groups",
+  "groupsPlusKnockout": "+ Knockout",
+  "groupSettings": "GROUP STAGE SETTINGS",
+  "numberOfGroups": "Groups",
+  "numberOfGroupsSubtitle": "How many groups to split players into",
+  "qualifiersPerGroup": "Qualifiers",
+  "qualifiersPerGroupSubtitle": "Players per group who reach the knockouts",
+  "groupName": "GROUP {letter}",
+  "@groupName": {
+    "placeholders": {
+      "letter": {
+        "type": "String"
+      }
+    }
+  },
+  "groupStage": "Group stage",
+  "groupsNeedMorePlayers": "You need at least {needed} players for {groups} groups.",
+  "@groupsNeedMorePlayers": {
+    "placeholders": {
+      "needed": {
+        "type": "int"
+      },
+      "groups": {
+        "type": "int"
+      }
+    }
+  },
+  "knockoutWaitingForGroups": "Knockout spots fill in once every group match is played.",
+  "laterResultWarningGroupBody": "Changing this score changes who qualifies from the groups. Knockout results from the {round} onward will be cleared and need to be entered again.",
+  "@laterResultWarningGroupBody": {
+    "placeholders": {
+      "round": {
+        "type": "String"
+      }
+    }
+  },
+  "shareResults": "Share results",
+  "latestResults": "LATEST RESULTS",
+  "upcomingMatches": "UP NEXT",
+  "championLine": "🏆 Champion: {name}",
+  "@championLine": {
+    "placeholders": {
+      "name": {
+        "type": "String"
+      }
+    }
+  },
+  "madeWithFixtura": "Made with Fixtura",
+  "pointsShort": "pts",
+  "dataSection": "BACKUP",
+  "exportBackup": "Export Backup",
+  "exportBackupSubtitle": "Save every tournament to a file",
+  "importBackup": "Import Backup",
+  "importBackupSubtitle": "Restore tournaments from a backup file",
+  "backupImported": "{count, plural, =1{1 tournament imported.} other{{count} tournaments imported.}}",
+  "@backupImported": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "backupNothingNew": "Everything in this backup is already in the app.",
+  "backupInvalid": "This file isn't a valid Fixtura backup.",
+  "backupExportFailed": "Couldn't create the backup.",
+  "noTournamentsToExport": "There are no tournaments to back up yet.",
+  "openTournament": "Open Tournament",
+  "resetScore": "RESET SCORE",
+  "saveResult": "SAVE RESULT",
+  "selectedTeam": "SELECTED TEAM"
 }

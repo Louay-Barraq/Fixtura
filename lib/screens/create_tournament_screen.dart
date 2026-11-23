@@ -4,6 +4,7 @@ import 'package:gap/gap.dart';
 import 'package:fixtura/l10n/app_localizations.dart';
 import '../providers/tournament_provider.dart';
 import '../models/tournament.dart';
+import '../logic/tournament_rules.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/short_section_header.dart';
@@ -38,6 +39,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
   bool _useRoulette = false;
   bool _rouletteUnique = true;
   bool _rouletteRoundUnique = true;
+  int _groupCount = 2;
+  int _qualifiersPerGroup = 2;
 
   @override
   void dispose() {
@@ -45,21 +48,33 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
     super.dispose();
   }
 
-  int _estimatedRoundCount() {
-    final participantCount = _playerNames.length;
-    if (_type == TournamentType.roundRobin) {
-      final effectiveTeams = participantCount.isOdd
-          ? participantCount + 1
-          : participantCount;
-      return _legs * (effectiveTeams - 1);
-    }
+  int _leagueRounds(int players) {
+    final effectiveTeams = players.isOdd ? players + 1 : players;
+    return _legs * (effectiveTeams - 1);
+  }
+
+  int _bracketRounds(int entrants) {
     var rounds = 0;
     var powerOfTwo = 1;
-    while (powerOfTwo < participantCount) {
+    while (powerOfTwo < entrants) {
       powerOfTwo <<= 1;
       rounds++;
     }
     return rounds;
+  }
+
+  int _estimatedRoundCount() {
+    final participantCount = _playerNames.length;
+    switch (_type) {
+      case TournamentType.roundRobin:
+        return _leagueRounds(participantCount);
+      case TournamentType.knockout:
+        return _bracketRounds(participantCount);
+      case TournamentType.groupsKnockout:
+        // The biggest group sets the number of group rounds
+        final biggestGroup = (participantCount / _groupCount).ceil();
+        return _leagueRounds(biggestGroup) + _bracketRounds(_groupCount * _qualifiersPerGroup);
+    }
   }
 
   Future<void> _submitForm() async {
@@ -91,6 +106,22 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
       return;
     }
 
+    if (_type == TournamentType.groupsKnockout) {
+      final needed = minPlayersForGroups(_groupCount, _qualifiersPerGroup);
+      if (_playerNames.length < needed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(
+              l10n.groupsNeedMorePlayers(needed, _groupCount),
+              style: const TextStyle(color: Colors.white),
+            ),
+            backgroundColor: const Color(0xFFD71212),
+          ),
+        );
+        return;
+      }
+    }
+
     if (_useRoulette) {
       if (_teamNames.isEmpty) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -108,7 +139,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'You need at least ${_estimatedRoundCount()} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have ${_teamNames.length}).',
+              l10n.rouletteDistinctNeedsMore(_estimatedRoundCount(), _teamNames.length),
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
@@ -120,7 +151,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(
-              'You need at least ${_playerNames.length} teams in MANAGE TEAMS to ensure unique assignments per player (you have ${_teamNames.length}).',
+              l10n.rouletteUniqueNeedsMore(_playerNames.length, _teamNames.length),
               style: const TextStyle(color: Colors.white),
             ),
             backgroundColor: const Color(0xFFD71212),
@@ -148,6 +179,8 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                 : []), // Teams used (PSG, RMA, etc.)
       rouletteUnique: _useRoulette ? _rouletteUnique : true,
       rouletteRoundUnique: _useRoulette ? _rouletteRoundUnique : true,
+      groupCount: _groupCount,
+      qualifiersPerGroup: _qualifiersPerGroup,
     );
 
     if (tournamentId != null && mounted) {
@@ -215,42 +248,90 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       // Section 2: FORMAT
                       ShortSectionHeader(title: l10n.format),
                       const Gap(12),
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          FormatOptionCard(
-                            title: l10n.league,
-                            subtitle: l10n.roundRobin,
-                            icon: Icons.leaderboard_rounded,
-                            isSelected: _type == TournamentType.roundRobin,
-                            onTap: () => setState(
-                              () => _type = TournamentType.roundRobin,
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: FormatOptionCard(
+                                width: null,
+                                title: l10n.league,
+                                subtitle: l10n.roundRobin,
+                                icon: Icons.leaderboard_rounded,
+                                isSelected: _type == TournamentType.roundRobin,
+                                onTap: () => setState(
+                                  () => _type = TournamentType.roundRobin,
+                                ),
+                              ),
                             ),
-                          ),
-                          const Gap(16),
-                          FormatOptionCard(
-                            title: l10n.brackets,
-                            subtitle: l10n.knockout,
-                            customPainter: (color) => _BracketFormatIconPainter(color),
-                            isSelected: _type == TournamentType.knockout,
-                            onTap: () =>
-                                setState(() => _type = TournamentType.knockout),
-                          ),
-                        ],
+                            const Gap(12),
+                            Expanded(
+                              child: FormatOptionCard(
+                                width: null,
+                                title: l10n.brackets,
+                                subtitle: l10n.knockout,
+                                customPainter: (color) => _BracketFormatIconPainter(color),
+                                isSelected: _type == TournamentType.knockout,
+                                onTap: () =>
+                                    setState(() => _type = TournamentType.knockout),
+                              ),
+                            ),
+                            const Gap(12),
+                            Expanded(
+                              child: FormatOptionCard(
+                                width: null,
+                                title: l10n.groups,
+                                subtitle: l10n.groupsPlusKnockout,
+                                icon: Icons.grid_view_rounded,
+                                isSelected: _type == TournamentType.groupsKnockout,
+                                onTap: () => setState(
+                                  () => _type = TournamentType.groupsKnockout,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
                       ),
                       const Gap(24),
 
                       // Section 3: LEAGUE SETTINGS (Smooth Animated Transition)
                       AnimatedCrossFade(
                         duration: const Duration(milliseconds: 300),
-                        crossFadeState: _type == TournamentType.roundRobin
+                        crossFadeState: _type != TournamentType.knockout
                             ? CrossFadeState.showFirst
                             : CrossFadeState.showSecond,
                         firstChild: Column(
                           children: [
+                            if (_type == TournamentType.groupsKnockout) ...[
+                              ShortSectionHeader(title: l10n.groupSettings),
+                              const Gap(12),
+                              DropdownTile(
+                                key: const ValueKey('groupCount'),
+                                title: l10n.numberOfGroups,
+                                subtitle: l10n.numberOfGroupsSubtitle,
+                                initialValue: '$_groupCount',
+                                options: [for (final g in groupCountOptions) '$g'],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => _groupCount = int.parse(val));
+                                },
+                              ),
+                              const Gap(16),
+                              DropdownTile(
+                                key: const ValueKey('qualifiers'),
+                                title: l10n.qualifiersPerGroup,
+                                subtitle: l10n.qualifiersPerGroupSubtitle,
+                                initialValue: '$_qualifiersPerGroup',
+                                options: [for (final q in qualifierOptions) '$q'],
+                                onChanged: (val) {
+                                  if (val != null) setState(() => _qualifiersPerGroup = int.parse(val));
+                                },
+                              ),
+                              const Gap(24),
+                            ],
                             ShortSectionHeader(title: l10n.leagueSettings),
                             const Gap(12),
                             DropdownTile(
+                              key: const ValueKey('legs'),
                               title: l10n.legs,
                               subtitle: l10n.legsSubtitle,
                               initialValue: _legs == 1
@@ -335,7 +416,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Players',
-                        hintText: 'Enter player name (e.g. John, David)...',
+                        hintText: l10n.playerHint,
                         onTagsChanged: (players) {
                           setState(() {
                             _playerNames = List.from(players);
@@ -349,7 +430,7 @@ class _CreateTournamentScreenState extends State<CreateTournamentScreen> {
                       const Gap(12),
                       DynamicInput(
                         tagType: 'Teams',
-                        hintText: 'Enter team name (e.g. PSG, RMA, FCB)...',
+                        hintText: l10n.teamHint,
                         onTagsChanged: (teams) {
                           setState(() {
                             _teamNames = List.from(teams);

@@ -225,9 +225,9 @@ class TournamentCard extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    const Text(
-                      'Open Bracket',
-                      style: TextStyle(
+                    Text(
+                      AppLocalizations.of(context)!.openTournament,
+                      style: const TextStyle(
                         fontFamily: 'RobotoMono',
                         color: Colors.white,
                         fontWeight: FontWeight.w600,

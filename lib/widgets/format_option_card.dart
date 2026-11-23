@@ -7,6 +7,7 @@ class FormatOptionCard extends StatelessWidget {
   final CustomPainter Function(Color color)? customPainter;
   final bool isSelected;
   final VoidCallback onTap;
+  final double? width;
 
   const FormatOptionCard({
     super.key,
@@ -16,6 +17,7 @@ class FormatOptionCard extends StatelessWidget {
     this.customPainter,
     required this.isSelected,
     required this.onTap,
+    this.width = 160,
   });
 
   @override
@@ -25,7 +27,7 @@ class FormatOptionCard extends StatelessWidget {
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
-        width: 160,
+        width: width,
         height: 115,
         duration: const Duration(milliseconds: 200),
         decoration: BoxDecoration(
@@ -46,7 +48,9 @@ class FormatOptionCard extends StatelessWidget {
               width: 38,
               height: 38,
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFFD71212) : const Color(0xFFF1F1F1),
+                color: isSelected
+                    ? const Color(0xFFD71212)
+                    : const Color(0xFFF1F1F1),
                 shape: BoxShape.circle,
                 border: Border.all(
                   color: isSelected ? Colors.white : const Color(0xFFD71212),
@@ -59,29 +63,36 @@ class FormatOptionCard extends StatelessWidget {
                         size: const Size(22, 22),
                         painter: customPainter!(accentColor),
                       )
-                    : Icon(
-                        icon ?? Icons.star,
-                        size: 20,
-                        color: accentColor,
-                      ),
+                    : Icon(icon ?? Icons.star, size: 20, color: accentColor),
               ),
             ),
             const SizedBox(height: 12),
-            Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'BebasNeue',
-                fontSize: 18,
-                color: isSelected ? Colors.white : Colors.black,
-                letterSpacing: 1,
+            FittedBox(
+              fit: BoxFit.scaleDown,
+              child: Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'BebasNeue',
+                  fontSize: 18,
+                  color: isSelected ? Colors.white : Colors.black,
+                  letterSpacing: 1,
+                ),
               ),
             ),
-            Text(
-              subtitle,
-              style: TextStyle(
-                fontFamily: 'RobotoMono',
-                fontSize: 10,
-                color: isSelected ? Colors.grey[400] : Colors.grey[700],
+            // Narrow cards shrink long subtitles instead of wrapping
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 6),
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                child: Text(
+                  subtitle,
+                  maxLines: 1,
+                  style: TextStyle(
+                    fontFamily: 'RobotoMono',
+                    fontSize: 10,
+                    color: isSelected ? Colors.grey[400] : Colors.grey[700],
+                  ),
+                ),
               ),
             ),
           ],

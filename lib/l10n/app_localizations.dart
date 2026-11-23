@@ -665,6 +665,450 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'DELETE'**
   String get delete;
+
+  /// No description provided for @laterResultWarningTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'CLEAR LATER RESULT?'**
+  String get laterResultWarningTitle;
+
+  /// No description provided for @laterResultWarningBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing this score will clear the result of the {round} and any rounds after it. You will need to enter them again.'**
+  String laterResultWarningBody(String round);
+
+  /// No description provided for @laterResultWarningContinue.
+  ///
+  /// In en, this message translates to:
+  /// **'CONTINUE'**
+  String get laterResultWarningContinue;
+
+  /// No description provided for @knockoutDrawNotAllowed.
+  ///
+  /// In en, this message translates to:
+  /// **'A draw isn\'t allowed in a knockout match. Pick the penalty shootout winner.'**
+  String get knockoutDrawNotAllowed;
+
+  /// No description provided for @penaltyShootoutWinner.
+  ///
+  /// In en, this message translates to:
+  /// **'PENALTY SHOOTOUT WINNER'**
+  String get penaltyShootoutWinner;
+
+  /// No description provided for @tbd.
+  ///
+  /// In en, this message translates to:
+  /// **'TBD'**
+  String get tbd;
+
+  /// No description provided for @bye.
+  ///
+  /// In en, this message translates to:
+  /// **'BYE'**
+  String get bye;
+
+  /// No description provided for @notDrafted.
+  ///
+  /// In en, this message translates to:
+  /// **'NOT DRAFTED'**
+  String get notDrafted;
+
+  /// No description provided for @currentPlayer.
+  ///
+  /// In en, this message translates to:
+  /// **'Current Player'**
+  String get currentPlayer;
+
+  /// No description provided for @currentPlayerSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Select active player to spin for'**
+  String get currentPlayerSubtitle;
+
+  /// No description provided for @playersStatus.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAYERS STATUS'**
+  String get playersStatus;
+
+  /// No description provided for @roundChip.
+  ///
+  /// In en, this message translates to:
+  /// **'ROUND'**
+  String get roundChip;
+
+  /// No description provided for @rouletteUpper.
+  ///
+  /// In en, this message translates to:
+  /// **'ROULETTE'**
+  String get rouletteUpper;
+
+  /// No description provided for @winPts.
+  ///
+  /// In en, this message translates to:
+  /// **'Win Pts'**
+  String get winPts;
+
+  /// No description provided for @drawPts.
+  ///
+  /// In en, this message translates to:
+  /// **'Draw Pts'**
+  String get drawPts;
+
+  /// No description provided for @lossPts.
+  ///
+  /// In en, this message translates to:
+  /// **'Loss Pts'**
+  String get lossPts;
+
+  /// No description provided for @couldNotOpenLink.
+  ///
+  /// In en, this message translates to:
+  /// **'Could not open {url}'**
+  String couldNotOpenLink(String url);
+
+  /// No description provided for @allDataCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'All data has been cleared.'**
+  String get allDataCleared;
+
+  /// No description provided for @tournamentNotFound.
+  ///
+  /// In en, this message translates to:
+  /// **'Tournament not found.'**
+  String get tournamentNotFound;
+
+  /// No description provided for @noMatchesYet.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches generated yet.'**
+  String get noMatchesYet;
+
+  /// No description provided for @noMatchesInRound.
+  ///
+  /// In en, this message translates to:
+  /// **'No matches in this round.'**
+  String get noMatchesInRound;
+
+  /// No description provided for @noStandings.
+  ///
+  /// In en, this message translates to:
+  /// **'No standings available.'**
+  String get noStandings;
+
+  /// No description provided for @finalRound.
+  ///
+  /// In en, this message translates to:
+  /// **'Final'**
+  String get finalRound;
+
+  /// No description provided for @semiFinals.
+  ///
+  /// In en, this message translates to:
+  /// **'Semi-finals'**
+  String get semiFinals;
+
+  /// No description provided for @quarterFinals.
+  ///
+  /// In en, this message translates to:
+  /// **'Quarter-finals'**
+  String get quarterFinals;
+
+  /// No description provided for @roundOf.
+  ///
+  /// In en, this message translates to:
+  /// **'Round of {count}'**
+  String roundOf(int count);
+
+  /// No description provided for @notEnoughRouletteTeams.
+  ///
+  /// In en, this message translates to:
+  /// **'Not enough roulette teams to draft round {round} for {player}. Add teams to the pool or turn off a uniqueness rule.'**
+  String notEnoughRouletteTeams(int round, String player);
+
+  /// No description provided for @autoDraftFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'The auto draft couldn\'t be completed.'**
+  String get autoDraftFailed;
+
+  /// No description provided for @rouletteDistinctNeedsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least {needed} teams in MANAGE TEAMS to keep assignments distinct across all rounds (you have {have}).'**
+  String rouletteDistinctNeedsMore(int needed, int have);
+
+  /// No description provided for @rouletteUniqueNeedsMore.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least {needed} teams in MANAGE TEAMS so every player gets a unique team (you have {have}).'**
+  String rouletteUniqueNeedsMore(int needed, int have);
+
+  /// No description provided for @playerHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter player name (e.g. John, David)...'**
+  String get playerHint;
+
+  /// No description provided for @teamHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter team name (e.g. PSG, RMA, FCB)...'**
+  String get teamHint;
+
+  /// No description provided for @onboardingTitle1.
+  ///
+  /// In en, this message translates to:
+  /// **'WELCOME TO FIXTURA'**
+  String get onboardingTitle1;
+
+  /// No description provided for @onboardingBody1.
+  ///
+  /// In en, this message translates to:
+  /// **'Host and manage local tournaments with your friends: round robin leagues, knockout brackets, and more. All offline, all yours.'**
+  String get onboardingBody1;
+
+  /// No description provided for @onboardingTitle2.
+  ///
+  /// In en, this message translates to:
+  /// **'PLAYERS & TEAMS'**
+  String get onboardingTitle2;
+
+  /// No description provided for @onboardingBody2.
+  ///
+  /// In en, this message translates to:
+  /// **'Players are the real people competing: you, your friends.\n\nTeams are the clubs they play as like PSG, Real Madrid, Barcelona, ...\n\nAdd your players first, then build your team pool.'**
+  String get onboardingBody2;
+
+  /// No description provided for @onboardingTitle3.
+  ///
+  /// In en, this message translates to:
+  /// **'SPIN THE ROULETTE'**
+  String get onboardingTitle3;
+
+  /// No description provided for @onboardingBody3.
+  ///
+  /// In en, this message translates to:
+  /// **'Can\'t decide who plays as what? Enable Team Roulette and let the wheel pick for you.\n\nSet it to unique so no two players get the same team, or distinct across rounds so nobody repeats.'**
+  String get onboardingBody3;
+
+  /// No description provided for @onboardingTitle4.
+  ///
+  /// In en, this message translates to:
+  /// **'TRACK EVERY GAME'**
+  String get onboardingTitle4;
+
+  /// No description provided for @onboardingBody4.
+  ///
+  /// In en, this message translates to:
+  /// **'Tap any match to enter the score. Standings update automatically: the points, the goal difference, everything.\n\nSwitch between rounds using the chips at the top.'**
+  String get onboardingBody4;
+
+  /// No description provided for @onboardingTitle5.
+  ///
+  /// In en, this message translates to:
+  /// **'YOU\'RE ALL SET'**
+  String get onboardingTitle5;
+
+  /// No description provided for @onboardingBody5.
+  ///
+  /// In en, this message translates to:
+  /// **'Create your first tournament from the home screen, or spin a quick roulette for fun.\n\nLet\'s go!'**
+  String get onboardingBody5;
+
+  /// No description provided for @groups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get groups;
+
+  /// No description provided for @groupsPlusKnockout.
+  ///
+  /// In en, this message translates to:
+  /// **'+ Knockout'**
+  String get groupsPlusKnockout;
+
+  /// No description provided for @groupSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'GROUP STAGE SETTINGS'**
+  String get groupSettings;
+
+  /// No description provided for @numberOfGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Groups'**
+  String get numberOfGroups;
+
+  /// No description provided for @numberOfGroupsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'How many groups to split players into'**
+  String get numberOfGroupsSubtitle;
+
+  /// No description provided for @qualifiersPerGroup.
+  ///
+  /// In en, this message translates to:
+  /// **'Qualifiers'**
+  String get qualifiersPerGroup;
+
+  /// No description provided for @qualifiersPerGroupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Players per group who reach the knockouts'**
+  String get qualifiersPerGroupSubtitle;
+
+  /// No description provided for @groupName.
+  ///
+  /// In en, this message translates to:
+  /// **'GROUP {letter}'**
+  String groupName(String letter);
+
+  /// No description provided for @groupStage.
+  ///
+  /// In en, this message translates to:
+  /// **'Group stage'**
+  String get groupStage;
+
+  /// No description provided for @groupsNeedMorePlayers.
+  ///
+  /// In en, this message translates to:
+  /// **'You need at least {needed} players for {groups} groups.'**
+  String groupsNeedMorePlayers(int needed, int groups);
+
+  /// No description provided for @knockoutWaitingForGroups.
+  ///
+  /// In en, this message translates to:
+  /// **'Knockout spots fill in once every group match is played.'**
+  String get knockoutWaitingForGroups;
+
+  /// No description provided for @laterResultWarningGroupBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Changing this score changes who qualifies from the groups. Knockout results from the {round} onward will be cleared and need to be entered again.'**
+  String laterResultWarningGroupBody(String round);
+
+  /// No description provided for @shareResults.
+  ///
+  /// In en, this message translates to:
+  /// **'Share results'**
+  String get shareResults;
+
+  /// No description provided for @latestResults.
+  ///
+  /// In en, this message translates to:
+  /// **'LATEST RESULTS'**
+  String get latestResults;
+
+  /// No description provided for @upcomingMatches.
+  ///
+  /// In en, this message translates to:
+  /// **'UP NEXT'**
+  String get upcomingMatches;
+
+  /// No description provided for @championLine.
+  ///
+  /// In en, this message translates to:
+  /// **'🏆 Champion: {name}'**
+  String championLine(String name);
+
+  /// No description provided for @madeWithFixtura.
+  ///
+  /// In en, this message translates to:
+  /// **'Made with Fixtura'**
+  String get madeWithFixtura;
+
+  /// No description provided for @pointsShort.
+  ///
+  /// In en, this message translates to:
+  /// **'pts'**
+  String get pointsShort;
+
+  /// No description provided for @dataSection.
+  ///
+  /// In en, this message translates to:
+  /// **'BACKUP'**
+  String get dataSection;
+
+  /// No description provided for @exportBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Export Backup'**
+  String get exportBackup;
+
+  /// No description provided for @exportBackupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Save every tournament to a file'**
+  String get exportBackupSubtitle;
+
+  /// No description provided for @importBackup.
+  ///
+  /// In en, this message translates to:
+  /// **'Import Backup'**
+  String get importBackup;
+
+  /// No description provided for @importBackupSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Restore tournaments from a backup file'**
+  String get importBackupSubtitle;
+
+  /// No description provided for @backupImported.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 tournament imported.} other{{count} tournaments imported.}}'**
+  String backupImported(int count);
+
+  /// No description provided for @backupNothingNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in this backup is already in the app.'**
+  String get backupNothingNew;
+
+  /// No description provided for @backupInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'This file isn\'t a valid Fixtura backup.'**
+  String get backupInvalid;
+
+  /// No description provided for @backupExportFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn\'t create the backup.'**
+  String get backupExportFailed;
+
+  /// No description provided for @noTournamentsToExport.
+  ///
+  /// In en, this message translates to:
+  /// **'There are no tournaments to back up yet.'**
+  String get noTournamentsToExport;
+
+  /// No description provided for @openTournament.
+  ///
+  /// In en, this message translates to:
+  /// **'Open Tournament'**
+  String get openTournament;
+
+  /// No description provided for @resetScore.
+  ///
+  /// In en, this message translates to:
+  /// **'RESET SCORE'**
+  String get resetScore;
+
+  /// No description provided for @saveResult.
+  ///
+  /// In en, this message translates to:
+  /// **'SAVE RESULT'**
+  String get saveResult;
+
+  /// No description provided for @selectedTeam.
+  ///
+  /// In en, this message translates to:
+  /// **'SELECTED TEAM'**
+  String get selectedTeam;
 }
 
 class _AppLocalizationsDelegate

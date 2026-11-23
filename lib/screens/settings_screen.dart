@@ -1,4 +1,9 @@
+import 'dart:io';
+
+import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
+import 'package:path/path.dart' as p;
+import 'package:path_provider/path_provider.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
 import 'package:url_launcher/url_launcher.dart';
@@ -6,6 +11,8 @@ import 'package:share_plus/share_plus.dart';
 import 'package:fixtura/l10n/app_localizations.dart';
 import '../providers/tournament_provider.dart';
 import '../providers/locale_provider.dart';
+import '../services/backup_service.dart';
+import '../utils/share_origin.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/short_section_header.dart';
@@ -14,7 +21,7 @@ import 'onboarding_screen.dart';
 class SettingsScreen extends StatelessWidget {
   const SettingsScreen({super.key});
 
-  final String _appVersion = 'v1.0.0';
+  final String _appVersion = 'v1.1.0';
   static const List<String> _languages = ['English', 'Français', 'Español', 'العربية'];
 
   Future<void> _launchUrl(BuildContext context, String urlString) async {
@@ -33,7 +40,7 @@ class SettingsScreen extends StatelessWidget {
       if (!launched && context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Could not open $urlString'),
+            content: Text(AppLocalizations.of(context)!.couldNotOpenLink(urlString)),
             backgroundColor: const Color(0xFFD71212),
           ),
         );
@@ -42,7 +49,7 @@ class SettingsScreen extends StatelessWidget {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('Error opening link: $e'),
+            content: Text(AppLocalizations.of(context)!.couldNotOpenLink(urlString)),
             backgroundColor: const Color(0xFFD71212),
           ),
         );
@@ -52,10 +59,68 @@ class SettingsScreen extends StatelessWidget {
 
   // ignore: unused_element
   void _shareApp(BuildContext context) {
-    Share.share(
-      'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
-      subject: 'Fixtura — Offline Tournament Manager',
+    SharePlus.instance.share(
+      ShareParams(
+        text:
+            'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
+        subject: 'Fixtura — Offline Tournament Manager',
+        sharePositionOrigin: shareOrigin(context),
+      ),
     );
+  }
+
+  void _showMessage(BuildContext context, String message, {bool isError = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isError ? const Color(0xFFD71212) : Colors.black,
+      ),
+    );
+  }
+
+  Future<void> _exportBackup(BuildContext context, AppLocalizations l10n) async {
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    if (provider.tournaments.isEmpty) {
+      _showMessage(context, l10n.noTournamentsToExport);
+      return;
+    }
+    // Read before any await, while the screen is certainly still laid out
+    final origin = shareOrigin(context);
+    try {
+      final json = await BackupService().exportJson();
+      final date = DateTime.now().toIso8601String().substring(0, 10);
+      final dir = await getTemporaryDirectory();
+      final file = File(p.join(dir.path, 'fixtura-backup-$date.json'));
+      await file.writeAsString(json);
+      await SharePlus.instance.share(
+        ShareParams(
+          files: [XFile(file.path, mimeType: 'application/json')],
+          subject: 'Fixtura backup $date',
+          sharePositionOrigin: origin,
+        ),
+      );
+    } catch (e) {
+      debugPrint('Backup export failed: $e');
+      if (context.mounted) _showMessage(context, l10n.backupExportFailed, isError: true);
+    }
+  }
+
+  Future<void> _importBackup(BuildContext context, AppLocalizations l10n) async {
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    try {
+      final picked = await FilePicker.pickFiles();
+      if (picked.isEmpty) return;
+      // xFile reads both plain paths and Android content:// URIs
+      final source = await picked.single.xFile.readAsString();
+
+      final count = await BackupService().importJson(source);
+      await provider.loadAllTournaments();
+      if (!context.mounted) return;
+      _showMessage(context, count == 0 ? l10n.backupNothingNew : l10n.backupImported(count));
+    } catch (e) {
+      debugPrint('Backup import failed: $e');
+      if (context.mounted) _showMessage(context, l10n.backupInvalid, isError: true);
+    }
   }
 
   void _confirmResetData(BuildContext context, AppLocalizations l10n) {
@@ -98,8 +163,8 @@ class SettingsScreen extends StatelessWidget {
               await provider.clearAllTournaments();
               if (context.mounted) {
                 ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                    content: Text('All data has been cleared.'),
+                  SnackBar(
+                    content: Text(l10n.allDataCleared),
                     backgroundColor: Colors.black,
                   ),
                 );
@@ -205,7 +270,27 @@ class SettingsScreen extends StatelessWidget {
                     // ),
                     const Gap(24),
 
-                    // Section 4: DANGER ZONE
+                    // Section 4: BACKUP
+                    ShortSectionHeader(title: l10n.dataSection),
+                    const Gap(12),
+                    _buildSettingsTile(
+                      context,
+                      icon: Icons.upload_file_rounded,
+                      title: l10n.exportBackup,
+                      subtitle: l10n.exportBackupSubtitle,
+                      onTap: () => _exportBackup(context, l10n),
+                    ),
+                    const Gap(10),
+                    _buildSettingsTile(
+                      context,
+                      icon: Icons.download_rounded,
+                      title: l10n.importBackup,
+                      subtitle: l10n.importBackupSubtitle,
+                      onTap: () => _importBackup(context, l10n),
+                    ),
+                    const Gap(24),
+
+                    // Section 5: DANGER ZONE
                     ShortSectionHeader(title: l10n.dangerZone),
                     const Gap(12),
                     _buildSettingsTile(

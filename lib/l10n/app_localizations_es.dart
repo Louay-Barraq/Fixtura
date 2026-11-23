@@ -304,4 +304,264 @@ class AppLocalizationsEs extends AppLocalizations {
 
   @override
   String get delete => 'ELIMINAR';
+
+  @override
+  String get laterResultWarningTitle => '¿BORRAR UN RESULTADO POSTERIOR?';
+
+  @override
+  String laterResultWarningBody(String round) {
+    return 'Cambiar este resultado borrará el de: $round, y el de las rondas siguientes. Tendrás que introducirlos de nuevo.';
+  }
+
+  @override
+  String get laterResultWarningContinue => 'CONTINUAR';
+
+  @override
+  String get knockoutDrawNotAllowed =>
+      'No se permite el empate en una eliminatoria. Elige al ganador de la tanda de penaltis.';
+
+  @override
+  String get penaltyShootoutWinner => 'GANADOR EN LOS PENALTIS';
+
+  @override
+  String get tbd => 'POR DEFINIR';
+
+  @override
+  String get bye => 'DESCANSA';
+
+  @override
+  String get notDrafted => 'SIN SORTEAR';
+
+  @override
+  String get currentPlayer => 'Jugador actual';
+
+  @override
+  String get currentPlayerSubtitle =>
+      'Elige el jugador para el que girar la ruleta';
+
+  @override
+  String get playersStatus => 'ESTADO DE LOS JUGADORES';
+
+  @override
+  String get roundChip => 'RONDA';
+
+  @override
+  String get rouletteUpper => 'RULETA';
+
+  @override
+  String get winPts => 'Pts victoria';
+
+  @override
+  String get drawPts => 'Pts empate';
+
+  @override
+  String get lossPts => 'Pts derrota';
+
+  @override
+  String couldNotOpenLink(String url) {
+    return 'No se pudo abrir $url';
+  }
+
+  @override
+  String get allDataCleared => 'Se han borrado todos los datos.';
+
+  @override
+  String get tournamentNotFound => 'Torneo no encontrado.';
+
+  @override
+  String get noMatchesYet => 'Aún no se han generado partidos.';
+
+  @override
+  String get noMatchesInRound => 'No hay partidos en esta ronda.';
+
+  @override
+  String get noStandings => 'No hay clasificación disponible.';
+
+  @override
+  String get finalRound => 'Final';
+
+  @override
+  String get semiFinals => 'Semifinales';
+
+  @override
+  String get quarterFinals => 'Cuartos de final';
+
+  @override
+  String roundOf(int count) {
+    return 'Ronda de $count';
+  }
+
+  @override
+  String notEnoughRouletteTeams(int round, String player) {
+    return 'No hay suficientes equipos para sortear la ronda $round de $player. Añade equipos o desactiva una regla de unicidad.';
+  }
+
+  @override
+  String get autoDraftFailed => 'No se pudo completar el sorteo automático.';
+
+  @override
+  String rouletteDistinctNeedsMore(int needed, int have) {
+    return 'Necesitas al menos $needed equipos en GESTIONAR EQUIPOS para que las asignaciones sean distintas en todas las rondas (tienes $have).';
+  }
+
+  @override
+  String rouletteUniqueNeedsMore(int needed, int have) {
+    return 'Necesitas al menos $needed equipos en GESTIONAR EQUIPOS para que cada jugador tenga un equipo único (tienes $have).';
+  }
+
+  @override
+  String get playerHint => 'Nombre del jugador (ej. Juan, David)...';
+
+  @override
+  String get teamHint => 'Nombre del equipo (ej. PSG, RMA, FCB)...';
+
+  @override
+  String get onboardingTitle1 => 'BIENVENIDO A FIXTURA';
+
+  @override
+  String get onboardingBody1 =>
+      'Organiza torneos locales con tus amigos: ligas, cuadros eliminatorios y más. Todo sin conexión, todo tuyo.';
+
+  @override
+  String get onboardingTitle2 => 'JUGADORES Y EQUIPOS';
+
+  @override
+  String get onboardingBody2 =>
+      'Los jugadores son las personas reales que compiten: tú y tus amigos.\n\nLos equipos son los clubes con los que juegan: PSG, Real Madrid, Barcelona...\n\nAñade primero a tus jugadores y luego tu lista de equipos.';
+
+  @override
+  String get onboardingTitle3 => 'GIRA LA RULETA';
+
+  @override
+  String get onboardingBody3 =>
+      '¿No sabéis quién juega con qué equipo? Activa la ruleta y deja que elija por ti.\n\nActiva la unicidad para que dos jugadores no tengan el mismo equipo, o la distinción entre rondas para que nadie repita.';
+
+  @override
+  String get onboardingTitle4 => 'SIGUE CADA PARTIDO';
+
+  @override
+  String get onboardingBody4 =>
+      'Toca un partido para introducir el resultado. La clasificación se actualiza sola: puntos, diferencia de goles, todo.\n\nCambia de ronda con los botones de arriba.';
+
+  @override
+  String get onboardingTitle5 => '¡TODO LISTO!';
+
+  @override
+  String get onboardingBody5 =>
+      'Crea tu primer torneo desde la pantalla de inicio o gira una ruleta rápida por diversión.\n\n¡Vamos!';
+
+  @override
+  String get groups => 'Grupos';
+
+  @override
+  String get groupsPlusKnockout => '+ Eliminatoria';
+
+  @override
+  String get groupSettings => 'AJUSTES DE LA FASE DE GRUPOS';
+
+  @override
+  String get numberOfGroups => 'Grupos';
+
+  @override
+  String get numberOfGroupsSubtitle =>
+      'En cuántos grupos dividir a los jugadores';
+
+  @override
+  String get qualifiersPerGroup => 'Clasificados';
+
+  @override
+  String get qualifiersPerGroupSubtitle =>
+      'Jugadores por grupo que pasan a la eliminatoria';
+
+  @override
+  String groupName(String letter) {
+    return 'GRUPO $letter';
+  }
+
+  @override
+  String get groupStage => 'Fase de grupos';
+
+  @override
+  String groupsNeedMorePlayers(int needed, int groups) {
+    return 'Necesitas al menos $needed jugadores para $groups grupos.';
+  }
+
+  @override
+  String get knockoutWaitingForGroups =>
+      'El cuadro se completa cuando se jueguen todos los partidos de grupo.';
+
+  @override
+  String laterResultWarningGroupBody(String round) {
+    return 'Este resultado cambia quién se clasifica de los grupos. Se borrarán los resultados de la eliminatoria desde $round y habrá que volver a introducirlos.';
+  }
+
+  @override
+  String get shareResults => 'Compartir resultados';
+
+  @override
+  String get latestResults => 'ÚLTIMOS RESULTADOS';
+
+  @override
+  String get upcomingMatches => 'PRÓXIMOS PARTIDOS';
+
+  @override
+  String championLine(String name) {
+    return '🏆 Campeón: $name';
+  }
+
+  @override
+  String get madeWithFixtura => 'Hecho con Fixtura';
+
+  @override
+  String get pointsShort => 'pts';
+
+  @override
+  String get dataSection => 'COPIA DE SEGURIDAD';
+
+  @override
+  String get exportBackup => 'Exportar copia';
+
+  @override
+  String get exportBackupSubtitle => 'Guarda todos los torneos en un archivo';
+
+  @override
+  String get importBackup => 'Importar copia';
+
+  @override
+  String get importBackupSubtitle => 'Restaura torneos desde un archivo';
+
+  @override
+  String backupImported(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count torneos importados.',
+      one: '1 torneo importado.',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get backupNothingNew => 'Todo lo de esta copia ya está en la app.';
+
+  @override
+  String get backupInvalid => 'Este archivo no es una copia de Fixtura válida.';
+
+  @override
+  String get backupExportFailed => 'No se pudo crear la copia.';
+
+  @override
+  String get noTournamentsToExport => 'Todavía no hay torneos que guardar.';
+
+  @override
+  String get openTournament => 'Abrir torneo';
+
+  @override
+  String get resetScore => 'BORRAR RESULTADO';
+
+  @override
+  String get saveResult => 'GUARDAR RESULTADO';
+
+  @override
+  String get selectedTeam => 'EQUIPO ELEGIDO';
 }

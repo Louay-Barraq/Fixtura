@@ -6,6 +6,16 @@ import '../models/tournament.dart';
 import '../models/team.dart';
 import '../models/match.dart';
 import '../models/standing.dart';
+import '../logic/tournament_rules.dart';
+
+/// Why an auto draft stopped. [round] and [player] are set when the pool ran
+/// out of teams for that player; otherwise the draft failed for another reason.
+class RouletteDraftError implements Exception {
+  final int? round;
+  final String? player;
+
+  const RouletteDraftError({this.round, this.player});
+}
 
 class TournamentProvider extends ChangeNotifier {
   List<Tournament> _tournaments = [];
@@ -36,19 +46,8 @@ class TournamentProvider extends ChangeNotifier {
   }
 
   // Calculate tournament progress percentage (0 to 100)
-  int calculateTournamentProgress(TournamentType type, List<MatchModel> matches) {
-    if (matches.isEmpty) return 0;
-
-    if (type == TournamentType.knockout) {
-      final completedMatches = matches.where((m) => m.isPlayed).length;
-      return ((completedMatches / matches.length) * 100).round();
-    } else {
-      final playableMatches = matches.where((m) => m.homeTeamId != null && m.awayTeamId != null).toList();
-      if (playableMatches.isEmpty) return 0;
-      final completedMatches = playableMatches.where((m) => m.isPlayed).length;
-      return ((completedMatches / playableMatches.length) * 100).round();
-    }
-  }
+  int calculateTournamentProgress(TournamentType type, List<MatchModel> matches) =>
+      tournamentProgress(type, matches);
 
   // Calculate tournament status ('active' vs 'completed') based on progress
   String calculateTournamentStatus(TournamentType type, List<MatchModel> matches) {
@@ -144,7 +143,18 @@ class TournamentProvider extends ChangeNotifier {
     List<String> roulettePool = const [],
     bool rouletteUnique = true,
     bool rouletteRoundUnique = true,
+    int groupCount = 0,
+    int qualifiersPerGroup = 0,
   }) async {
+    final isGroups = type == TournamentType.groupsKnockout;
+    if (isGroups &&
+        (!groupCountOptions.contains(groupCount) ||
+            !qualifierOptions.contains(qualifiersPerGroup) ||
+            teamNames.length < minPlayersForGroups(groupCount, qualifiersPerGroup))) {
+      debugPrint('Invalid group setup: $groupCount groups, $qualifiersPerGroup qualifiers, ${teamNames.length} players');
+      return null;
+    }
+
     _isLoading = true;
     notifyListeners();
 
@@ -166,6 +176,8 @@ class TournamentProvider extends ChangeNotifier {
           roulettePool: roulettePool,
           rouletteUnique: rouletteUnique,
           rouletteRoundUnique: rouletteRoundUnique,
+          groupCount: isGroups ? groupCount : 0,
+          qualifiersPerGroup: isGroups ? qualifiersPerGroup : 0,
         );
         tournamentId = await _dbHelper.insertTournament(tournament, txn);
 
@@ -183,6 +195,8 @@ class TournamentProvider extends ChangeNotifier {
             tournamentId: tournamentId!,
             name: teamNames[i].trim(),
             colorHex: teamColor,
+            // Deal players into groups in entry order: A, B, C, ..., A, B, ...
+            groupIndex: isGroups ? i % groupCount : null,
           );
           final teamId = await _dbHelper.insertTeam(team, txn);
           insertedTeams.add(team.copyWith(id: teamId));
@@ -193,6 +207,8 @@ class TournamentProvider extends ChangeNotifier {
           await _generateRoundRobinFixtures(tournamentId!, insertedTeams, legs, txn);
         } else if (type == TournamentType.knockout) {
           await _generateKnockoutFixtures(tournamentId!, insertedTeams, txn);
+        } else {
+          await _generateGroupsKnockoutFixtures(tournament.copyWith(id: tournamentId), insertedTeams, txn);
         }
       });
 
@@ -429,8 +445,8 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
-  Future<String?> autoDraftRound(int roundNumber) async {
-    if (_activeTournament == null) return 'No active tournament.';
+  Future<RouletteDraftError?> autoDraftRound(int roundNumber) async {
+    if (_activeTournament == null) return const RouletteDraftError();
 
     _isLoading = true;
     notifyListeners();
@@ -454,10 +470,7 @@ class TournamentProvider extends ChangeNotifier {
 
           if (availableTeams.isEmpty) {
             if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
-              throw StateError(
-                'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
-                'Add more teams to the roulette pool or relax the uniqueness constraints.',
-              );
+              throw RouletteDraftError(round: roundNumber, player: team.name);
             }
             continue;
           }
@@ -481,15 +494,15 @@ class TournamentProvider extends ChangeNotifier {
       return null;
     } catch (e) {
       debugPrint("Error auto drafting round $roundNumber: $e");
-      return e is StateError ? e.message : 'Error auto drafting round: $e';
+      return e is RouletteDraftError ? e : const RouletteDraftError();
     } finally {
       _isLoading = false;
       notifyListeners();
     }
   }
 
-  Future<String?> autoDraftAllRounds() async {
-    if (_activeTournament == null) return 'No active tournament.';
+  Future<RouletteDraftError?> autoDraftAllRounds() async {
+    if (_activeTournament == null) return const RouletteDraftError();
     
     _isLoading = true;
     notifyListeners();
@@ -514,10 +527,7 @@ class TournamentProvider extends ChangeNotifier {
             );
             if (availableTeams.isEmpty) {
               if (_activeTournament!.rouletteUnique || _activeTournament!.rouletteRoundUnique) {
-                throw StateError(
-                  'Not enough roulette teams to draft round $roundNumber for ${team.name}. '
-                  'Add more teams to the roulette pool or relax the uniqueness constraints.',
-                );
+                throw RouletteDraftError(round: roundNumber, player: team.name);
               }
               continue;
             }
@@ -543,7 +553,7 @@ class TournamentProvider extends ChangeNotifier {
       return null;
     } catch (e) {
       debugPrint("Error in auto draft: $e");
-      return e is StateError ? e.message : 'Error auto drafting all rounds: $e';
+      return e is RouletteDraftError ? e : const RouletteDraftError();
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -556,6 +566,7 @@ class TournamentProvider extends ChangeNotifier {
     List<Team> teams,
     int legs, [
     DatabaseExecutor? txn,
+    int? groupIndex,
   ]) async {
     // If odd number of teams, add a dummy team representing a BYE (id = null)
     List<Team?> list = List.from(teams);
@@ -605,6 +616,7 @@ class TournamentProvider extends ChangeNotifier {
             homeScore: isByeMatch ? 0 : null,
             awayScore: isByeMatch ? 0 : null,
             bracketPos: matchIdx,
+            groupIndex: groupIndex,
           );
 
           await _dbHelper.insertMatch(match, txn);
@@ -613,28 +625,28 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
-  // Generate Knockout matches (bracket tree) backwards
-  Future<void> _generateKnockoutFixtures(int tournamentId, List<Team> teams, [DatabaseExecutor? txn]) async {
-    final n = teams.length;
-    if (n < 2) return;
-
-    // Calculate next power of 2
+  // Build an empty bracket for [slotCount] entrants (rounded up to a power of
+  // two) from the final backwards, numbering its rounds after [roundOffset].
+  // Returns the first-round matches in bracket order.
+  Future<List<MatchModel>> _buildBracket(
+    int tournamentId,
+    int slotCount,
+    int roundOffset,
+    DatabaseExecutor? txn,
+  ) async {
     int p = 1;
-    while (p < n) {
+    while (p < slotCount) {
       p *= 2;
     }
 
-    final totalRounds = (log(p) / log(2)).round(); // e.g. 8 teams = 3 rounds
-    final List<List<MatchModel>> roundsMatches = [];
-
-    // Step A: Build the empty bracket structure from final round backwards
-    // roundIndex = 0 is final round, roundIndex = totalRounds - 1 is the first round
+    final totalRounds = (log(p) / log(2)).round(); // e.g. 8 slots = 3 rounds
     List<MatchModel> previousRoundMatches = [];
 
+    // rIdx = 0 is the final, rIdx = totalRounds - 1 is the first round
     for (int rIdx = 0; rIdx < totalRounds; rIdx++) {
       final roundMatchesCount = 1 << rIdx; // 1, 2, 4, 8...
-      final roundNumber = totalRounds - rIdx;
-      final roundName = _getKnockoutRoundName(roundNumber, totalRounds);
+      final bracketRound = totalRounds - rIdx;
+      final roundName = _getKnockoutRoundName(bracketRound, totalRounds);
       final List<MatchModel> currentRoundMatches = [];
 
       for (int mIdx = 0; mIdx < roundMatchesCount; mIdx++) {
@@ -642,15 +654,14 @@ class TournamentProvider extends ChangeNotifier {
         bool? nextMatchIsHome;
 
         if (rIdx > 0) {
-          // Link to match in previous iteration (closer to final)
-          final parentMatchIndex = mIdx ~/ 2;
-          nextMatchId = previousRoundMatches[parentMatchIndex].id;
+          // Link to the match one round closer to the final
+          nextMatchId = previousRoundMatches[mIdx ~/ 2].id;
           nextMatchIsHome = mIdx % 2 == 0;
         }
 
         final match = MatchModel(
           tournamentId: tournamentId,
-          roundNumber: roundNumber,
+          roundNumber: roundOffset + bracketRound,
           roundName: roundName,
           bracketPos: mIdx,
           nextMatchId: nextMatchId,
@@ -662,15 +673,19 @@ class TournamentProvider extends ChangeNotifier {
       }
 
       previousRoundMatches = currentRoundMatches;
-      roundsMatches.add(currentRoundMatches);
     }
 
-    // Step B: Populate first round matches with teams and handle byes
-    // The first round matches are in roundsMatches.last (which corresponds to roundNumber = 1)
-    final firstRoundMatches = roundsMatches.last;
+    return previousRoundMatches;
+  }
+
+  // Generate Knockout matches (bracket tree) and seed the players in order
+  Future<void> _generateKnockoutFixtures(int tournamentId, List<Team> teams, [DatabaseExecutor? txn]) async {
+    final n = teams.length;
+    if (n < 2) return;
+
+    final firstRoundMatches = await _buildBracket(tournamentId, n, 0, txn);
     final k = firstRoundMatches.length; // e.g., 4 matches for 8 slots
 
-    // Fill home slots
     for (int i = 0; i < k; i++) {
       int? homeTeamId = i < n ? teams[i].id : null;
       int? awayTeamId = (i + k) < n ? teams[i + k].id : null;
@@ -699,12 +714,132 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
+  // Generate a league per group, then an empty bracket after the group
+  // rounds. The bracket is filled once every group match is played.
+  Future<void> _generateGroupsKnockoutFixtures(
+    Tournament tournament,
+    List<Team> teams, [
+    DatabaseExecutor? txn,
+  ]) async {
+    var groupRounds = 0;
+    for (var g = 0; g < tournament.groupCount; g++) {
+      final groupTeams = teams.where((t) => t.groupIndex == g).toList();
+      await _generateRoundRobinFixtures(tournament.id!, groupTeams, tournament.legs, txn, g);
+      final effective = groupTeams.length.isOdd ? groupTeams.length + 1 : groupTeams.length;
+      groupRounds = max(groupRounds, tournament.legs * (effective - 1));
+    }
+
+    await _buildBracket(
+      tournament.id!,
+      tournament.groupCount * tournament.qualifiersPerGroup,
+      groupRounds,
+      txn,
+    );
+  }
+
+  // Put the group qualifiers into the first bracket round, or empty it while
+  // group matches remain. A first-round match whose teams change loses its
+  // result, and so does every later match it fed.
+  Future<void> _syncKnockoutSlots(Tournament tournament, DatabaseExecutor txn) async {
+    final teams = await _dbHelper.getTeamsForTournament(tournament.id!, txn);
+    final matches = await _dbHelper.getMatchesForTournament(tournament.id!, txn);
+    final slots = knockoutSlots(tournament, teams, matches);
+    final firstRound = _firstBracketRound(matches);
+
+    for (var i = 0; i < firstRound.length; i++) {
+      final match = firstRound[i];
+      final home = slots[2 * i];
+      final away = slots[2 * i + 1];
+      if (match.homeTeamId == home && match.awayTeamId == away) continue;
+
+      final updated = match.copyWith(homeTeamId: home, awayTeamId: away);
+      if (match.isPlayed) {
+        await _resetMatchAndDownstream(updated, txn);
+      } else {
+        await _dbHelper.updateMatch(updated, txn);
+      }
+    }
+  }
+
+  List<MatchModel> _firstBracketRound(List<MatchModel> matches) {
+    final bracket = matches.where((m) => m.groupIndex == null).toList();
+    if (bracket.isEmpty) return const [];
+    final firstRound = bracket.map((m) => m.roundNumber).reduce(min);
+    return bracket.where((m) => m.roundNumber == firstRound).toList()
+      ..sort((a, b) => (a.bracketPos ?? 0).compareTo(b.bracketPos ?? 0));
+  }
+
   String _getKnockoutRoundName(int roundNumber, int totalRounds) {
     final roundsFromFinal = totalRounds - roundNumber;
     if (roundsFromFinal == 0) return "Final";
     if (roundsFromFinal == 1) return "Semi-finals";
     if (roundsFromFinal == 2) return "Quarter-finals";
     return "Round of ${1 << (roundsFromFinal + 1)}";
+  }
+
+  // The earliest already-played match that saving this score would clear,
+  // if any. Pass null scores when the result is being reset.
+  MatchModel? laterMatchClearedBy(MatchModel match, int? homeScore, int? awayScore) {
+    final tournament = _activeTournament;
+    if (tournament == null) return null;
+
+    if (tournament.type == TournamentType.groupsKnockout && match.groupIndex != null) {
+      return _bracketMatchClearedByGroupResult(tournament, match, homeScore, awayScore);
+    }
+    if (!isKnockoutStage(tournament.type, match) || match.nextMatchId == null) {
+      return null;
+    }
+
+    final nextIndex = _activeMatches.indexWhere((m) => m.id == match.nextMatchId);
+    if (nextIndex == -1) return null;
+    final nextMatch = _activeMatches[nextIndex];
+    if (!nextMatch.isPlayed) return null;
+
+    if (homeScore == null || awayScore == null) return nextMatch;
+    if (homeScore == awayScore) return null;
+
+    final winnerId = homeScore > awayScore ? match.homeTeamId : match.awayTeamId;
+    final advancedId = match.nextMatchIsHome == true ? nextMatch.homeTeamId : nextMatch.awayTeamId;
+    return winnerId == advancedId ? null : nextMatch;
+  }
+
+  // A group result can change who qualifies. Works out the bracket this score
+  // would produce and returns the earliest played bracket match it would clear.
+  MatchModel? _bracketMatchClearedByGroupResult(
+    Tournament tournament,
+    MatchModel match,
+    int? homeScore,
+    int? awayScore,
+  ) {
+    final bracket = _activeMatches.where((m) => m.groupIndex == null).toList();
+    if (!bracket.any((m) => m.isPlayed)) return null;
+
+    final played = homeScore != null && awayScore != null;
+    final simulated = [
+      for (final m in _activeMatches)
+        m.id == match.id
+            ? m.copyWith(homeScore: homeScore, awayScore: awayScore, isPlayed: played)
+            : m,
+    ];
+    final newSlots = knockoutSlots(tournament, _activeTeams, simulated);
+    final firstRound = _firstBracketRound(_activeMatches);
+
+    final affected = <MatchModel>[];
+    for (var i = 0; i < firstRound.length; i++) {
+      final current = firstRound[i];
+      if (current.homeTeamId == newSlots[2 * i] && current.awayTeamId == newSlots[2 * i + 1]) continue;
+      // Everything this match feeds is affected too
+      MatchModel? next = current;
+      while (next != null) {
+        affected.add(next);
+        final nextId = next.nextMatchId;
+        next = nextId == null ? null : bracket.where((m) => m.id == nextId).firstOrNull;
+      }
+    }
+
+    final cleared = affected.where((m) => m.isPlayed).toList()
+      ..sort((a, b) => a.roundNumber.compareTo(b.roundNumber));
+    return cleared.isEmpty ? null : cleared.first;
   }
 
   // Update a match score
@@ -717,6 +852,8 @@ class TournamentProvider extends ChangeNotifier {
       await db.transaction((txn) async {
         final match = await _dbHelper.getMatch(matchId, txn);
         if (match == null) return;
+        final tournament = await _dbHelper.getTournament(match.tournamentId, txn);
+        if (tournament == null) return;
 
         final updatedMatch = match.copyWith(
           homeScore: homeScore,
@@ -726,14 +863,17 @@ class TournamentProvider extends ChangeNotifier {
 
         await _dbHelper.updateMatch(updatedMatch, txn);
 
-        // If it's a knockout tournament, propagate the winner
-        if (_activeTournament?.type == TournamentType.knockout) {
+        if (isKnockoutStage(tournament.type, updatedMatch)) {
+          // Bracket match: move the winner on
           if (updatedMatch.isPlayed) {
             await _propagateWinner(updatedMatch, txn);
           } else {
             // If match is cleared/unplayed, reset downstream
             await _resetMatchAndDownstream(updatedMatch, txn);
           }
+        } else if (tournament.type == TournamentType.groupsKnockout) {
+          // Group match: the qualifiers may have changed
+          await _syncKnockoutSlots(tournament, txn);
         }
       });
 
@@ -868,62 +1008,23 @@ class TournamentProvider extends ChangeNotifier {
     }
   }
 
-  // Calculate Standings Table on the fly
+  // League table for a round-robin tournament
   List<Standing> calculateStandings() {
-    if (_activeTournament == null || _activeTournament!.type != TournamentType.roundRobin) {
-      return [];
-    }
+    final t = _activeTournament;
+    if (t == null || t.type != TournamentType.roundRobin) return [];
+    return computeStandings(_activeTeams, _activeMatches, t.pointsForWin, t.pointsForDraw, t.pointsForLoss);
+  }
 
-    // Map each team to a Standing object
-    final Map<int, Standing> standingsMap = {
-      for (var team in _activeTeams) team.id!: Standing(team: team)
-    };
+  // One table per group for a groups + knockout tournament
+  List<List<Standing>> calculateGroupStandings() {
+    final t = _activeTournament;
+    if (t == null || t.type != TournamentType.groupsKnockout) return [];
+    return computeGroupStandings(t, _activeTeams, _activeMatches);
+  }
 
-    for (var match in _activeMatches) {
-      // Skip BYE matches or unplayed matches
-      if (match.homeTeamId == null || match.awayTeamId == null || !match.isPlayed) {
-        continue;
-      }
-
-      final homeStanding = standingsMap[match.homeTeamId];
-      final awayStanding = standingsMap[match.awayTeamId];
-
-      if (homeStanding == null || awayStanding == null) continue;
-
-      homeStanding.played += 1;
-      awayStanding.played += 1;
-
-      final hs = match.homeScore ?? 0;
-      final as = match.awayScore ?? 0;
-
-      homeStanding.goalsFor += hs;
-      homeStanding.goalsAgainst += as;
-      awayStanding.goalsFor += as;
-      awayStanding.goalsAgainst += hs;
-
-      if (hs > as) {
-        homeStanding.won += 1;
-        awayStanding.lost += 1;
-      } else if (as > hs) {
-        awayStanding.won += 1;
-        homeStanding.lost += 1;
-      } else {
-        homeStanding.drawn += 1;
-        awayStanding.drawn += 1;
-      }
-    }
-
-    final result = standingsMap.values.toList();
-    
-    // Sort standings
-    result.sort((a, b) => Standing.compare(
-      a,
-      b,
-      _activeTournament!.pointsForWin,
-      _activeTournament!.pointsForDraw,
-      _activeTournament!.pointsForLoss,
-    ));
-
-    return result;
+  int? get championTeamId {
+    final t = _activeTournament;
+    if (t == null) return null;
+    return championId(t, _activeTeams, _activeMatches);
   }
 }

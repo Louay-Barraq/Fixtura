@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
+import 'package:fixtura/l10n/app_localizations.dart';
 import '../models/match.dart';
 import '../models/team.dart';
 import '../models/tournament.dart';
 import '../providers/tournament_provider.dart';
+import '../utils/round_names.dart';
 import 'short_section_header.dart';
 import 'square_button.dart';
 
@@ -38,13 +40,74 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
     _awayScore = widget.match.awayScore ?? 0;
   }
 
-  void _saveScore() {
+  // Asks before a save would wipe a later match's result. True means go ahead.
+  Future<bool> _confirmLaterResultCleared(int? homeScore, int? awayScore) async {
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    final clearedMatch = provider.laterMatchClearedBy(widget.match, homeScore, awayScore);
+    if (clearedMatch == null) return true;
+
+    final l10n = AppLocalizations.of(context)!;
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        backgroundColor: Colors.white,
+        title: Text(
+          l10n.laterResultWarningTitle,
+          style: const TextStyle(
+            fontFamily: 'BebasNeue',
+            fontSize: 22,
+            color: Color(0xFFD71212),
+          ),
+        ),
+        content: Text(
+          // The cleared match is always a bracket match
+          (widget.match.groupIndex != null
+              ? l10n.laterResultWarningGroupBody
+              : l10n.laterResultWarningBody)(
+            localizedRoundName(l10n, clearedMatch, TournamentType.knockout, provider.activeMatches),
+          ),
+          style: const TextStyle(
+            fontFamily: 'RobotoMono',
+            fontSize: 13,
+            color: Colors.black87,
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: Text(
+              l10n.cancel,
+              style: const TextStyle(
+                fontFamily: 'RobotoMono',
+                color: Colors.black54,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            child: Text(
+              l10n.laterResultWarningContinue,
+              style: const TextStyle(
+                fontFamily: 'RobotoMono',
+                color: Color(0xFFD71212),
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+    return confirmed == true;
+  }
+
+  Future<void> _saveScore() async {
     if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
       if (_penaltyWinnerId == null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(
-            content: Text('A draw is not allowed in Knockouts. Please select a penalty winner.'),
-            backgroundColor: Color(0xFFD71212),
+          SnackBar(
+            content: Text(AppLocalizations.of(context)!.knockoutDrawNotAllowed),
+            backgroundColor: const Color(0xFFD71212),
           ),
         );
         return;
@@ -62,13 +125,17 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
       }
     }
 
+    if (!await _confirmLaterResultCleared(finalHScore, finalAScore) || !mounted) return;
+
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     provider.updateMatchScore(widget.match.id!, finalHScore, finalAScore);
 
     Navigator.pop(context);
   }
 
-  void _clearScore() {
+  Future<void> _clearScore() async {
+    if (!await _confirmLaterResultCleared(null, null) || !mounted) return;
+
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     provider.updateMatchScore(widget.match.id!, null, null);
     Navigator.pop(context);
@@ -76,8 +143,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
 
   @override
   Widget build(BuildContext context) {
-    final homeName = widget.homeTeam?.name ?? 'TBD';
-    final awayName = widget.awayTeam?.name ?? 'TBD';
+    final l10n = AppLocalizations.of(context)!;
+    final provider = Provider.of<TournamentProvider>(context, listen: false);
+    final homeName = widget.homeTeam?.name ?? l10n.tbd;
+    final awayName = widget.awayTeam?.name ?? l10n.tbd;
     final isKnockout = widget.tournamentType == TournamentType.knockout;
     final isTie = _homeScore == _awayScore;
 
@@ -116,7 +185,7 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
             // Header Title
             Center(
               child: ShortSectionHeader(
-                title: widget.match.roundName.toUpperCase(),
+                title: localizedRoundName(l10n, widget.match, widget.tournamentType, provider.activeMatches).toUpperCase(),
               ),
             ),
             const Gap(24),
@@ -208,9 +277,9 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                 ),
                 child: Column(
                   children: [
-                    const Text(
-                      'PENALTY SHOOTOUT WINNER',
-                      style: TextStyle(
+                    Text(
+                      l10n.penaltyShootoutWinner,
+                      style: const TextStyle(
                         fontFamily: 'BebasNeue',
                         fontSize: 16,
                         color: Color(0xFFD71212),
@@ -269,10 +338,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                             ),
                           ],
                         ),
-                        child: const Center(
+                        child: Center(
                           child: Text(
-                            'RESET SCORE',
-                            style: TextStyle(
+                            l10n.resetScore,
+                            style: const TextStyle(
                               fontFamily: 'BebasNeue',
                               fontSize: 18,
                               color: Color(0xFFD71212),
@@ -303,10 +372,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                           ),
                         ],
                       ),
-                      child: const Center(
+                      child: Center(
                         child: Text(
-                          'SAVE RESULT',
-                          style: TextStyle(
+                          l10n.saveResult,
+                          style: const TextStyle(
                             fontFamily: 'BebasNeue',
                             fontSize: 20,
                             color: Colors.white,
