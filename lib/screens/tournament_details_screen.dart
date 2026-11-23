@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:fixtura/l10n/app_localizations.dart';
 import 'package:provider/provider.dart';
+import 'package:share_plus/share_plus.dart';
 import 'package:gap/gap.dart';
 import '../models/match.dart';
 import '../models/team.dart';
@@ -8,6 +9,7 @@ import '../models/tournament.dart';
 import '../models/standing.dart';
 import '../providers/tournament_provider.dart';
 import '../logic/tournament_rules.dart';
+import '../logic/share_text.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/tournament_appbar.dart';
@@ -123,6 +125,27 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                         provider.loadAllTournaments();
                         Navigator.pop(context);
                       },
+                    ),
+                    Positioned.directional(
+                      textDirection: Directionality.of(context),
+                      end: 58,
+                      top: 10,
+                      child: Semantics(
+                        label: AppLocalizations.of(context)!.shareResults,
+                        button: true,
+                        child: CircleIconButton(
+                          icon: Icons.share_rounded,
+                          onTap: () => Share.share(
+                            buildShareText(
+                              l10n: AppLocalizations.of(context)!,
+                              tournament: tournament,
+                              teams: teams,
+                              matches: matches,
+                            ),
+                            subject: tournament.name,
+                          ),
+                        ),
+                      ),
                     ),
                     Positioned.directional(
                       textDirection: Directionality.of(context),

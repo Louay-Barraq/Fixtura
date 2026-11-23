@@ -22,7 +22,7 @@ class TournamentAppbar extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Padding(
-                  padding: const EdgeInsets.only(top: 8, left: 60, right: 60),
+                  padding: const EdgeInsets.only(top: 8, left: 104, right: 104),
                   child: Text(
                     tournamentName,
                     maxLines: 1,
