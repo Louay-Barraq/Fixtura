@@ -10,6 +10,7 @@ import '../models/standing.dart';
 import '../providers/tournament_provider.dart';
 import '../logic/tournament_rules.dart';
 import '../logic/share_text.dart';
+import '../utils/share_origin.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/circle_icon_button.dart';
 import '../widgets/tournament_appbar.dart';
@@ -133,16 +134,19 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
                       child: Semantics(
                         label: AppLocalizations.of(context)!.shareResults,
                         button: true,
-                        child: CircleIconButton(
-                          icon: Icons.share_rounded,
-                          onTap: () => Share.share(
-                            buildShareText(
-                              l10n: AppLocalizations.of(context)!,
-                              tournament: tournament,
-                              teams: teams,
-                              matches: matches,
+                        child: Builder(
+                          builder: (buttonContext) => CircleIconButton(
+                            icon: Icons.share_rounded,
+                            onTap: () => Share.share(
+                              buildShareText(
+                                l10n: AppLocalizations.of(context)!,
+                                tournament: tournament,
+                                teams: teams,
+                                matches: matches,
+                              ),
+                              subject: tournament.name,
+                              sharePositionOrigin: shareOrigin(buttonContext),
                             ),
-                            subject: tournament.name,
                           ),
                         ),
                       ),
@@ -310,7 +314,7 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
         widgets.add(
           Padding(
             padding: EdgeInsets.only(top: widgets.isEmpty ? 0 : 12, bottom: 6),
-            child: ShortSectionHeader(title: l10n.groupName(groupLetter(currentGroup!))),
+            child: Center(child: ShortSectionHeader(title: l10n.groupName(groupLetter(currentGroup!)))),
           ),
         );
       }

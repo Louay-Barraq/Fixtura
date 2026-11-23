@@ -13,6 +13,7 @@ import 'package:fixtura/l10n/app_localizations.dart';
 import '../providers/tournament_provider.dart';
 import '../providers/locale_provider.dart';
 import '../services/backup_service.dart';
+import '../utils/share_origin.dart';
 import '../widgets/app_back_button.dart';
 import '../widgets/main_appbar.dart';
 import '../widgets/short_section_header.dart';
@@ -62,6 +63,7 @@ class SettingsScreen extends StatelessWidget {
     Share.share(
       'Check out Fixtura — the offline tournament generator, league standings, and team roulette drafting app for Android!\nhttps://play.google.com/store/apps/details?id=com.louaybarraq.fixtura',
       subject: 'Fixtura — Offline Tournament Manager',
+      sharePositionOrigin: shareOrigin(context),
     );
   }
 
@@ -80,6 +82,8 @@ class SettingsScreen extends StatelessWidget {
       _showMessage(context, l10n.noTournamentsToExport);
       return;
     }
+    // Read before any await, while the screen is certainly still laid out
+    final origin = shareOrigin(context);
     try {
       final json = await BackupService().exportJson();
       final date = DateTime.now().toIso8601String().substring(0, 10);
@@ -89,6 +93,7 @@ class SettingsScreen extends StatelessWidget {
       await Share.shareXFiles(
         [XFile(file.path, mimeType: 'application/json')],
         subject: 'Fixtura backup $date',
+        sharePositionOrigin: origin,
       );
     } catch (e) {
       debugPrint('Backup export failed: $e');
