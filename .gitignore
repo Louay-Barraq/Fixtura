@@ -46,3 +46,6 @@ GoogleService-Info.plist
 # ─── Design References ─────────────────────────────────────────
 /screenshots/
 /artifacts/
+
+# ─── Local release notes (Play Console copy) ───────────────────
+/RELEASE_NOTES.md
