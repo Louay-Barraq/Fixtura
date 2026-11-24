@@ -59,7 +59,11 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
         final teams = provider.activeTeams;
         final matches = provider.activeMatches;
 
-        if (provider.isLoading && tournament == null) {
+        // Until this tournament has loaded, the provider can still hold the one
+        // opened before it. Building from that would pick one of its rounds,
+        // which may not exist here and leaves the fixtures list empty.
+        final isStale = tournament != null && tournament.id != widget.tournamentId;
+        if (isStale || (provider.isLoading && tournament == null)) {
           return const Scaffold(
             backgroundColor: Color(0xFFFFFCFC),
             body: Center(child: CircularProgressIndicator(color: Colors.black)),
@@ -81,20 +85,11 @@ class _TournamentDetailsScreenState extends State<TournamentDetailsScreen> {
 
         final showRouletteTab = tournament.useRoulette;
 
-        // Initialize smart round selector (focus on first round with unplayed matches)
-        if (!_initializedRound && matches.isNotEmpty) {
-          int activeRound = 1;
-          final Set<int> rounds = matches.map((m) => m.roundNumber).toSet();
-          final sortedRounds = rounds.toList()..sort();
-
-          for (var r in sortedRounds) {
-            final roundMatches = matches.where((m) => m.roundNumber == r);
-            if (roundMatches.any((m) => !m.isPlayed && m.homeTeamId != null && m.awayTeamId != null)) {
-              activeRound = r;
-              break;
-            }
-          }
-          _selectedRound = activeRound;
+        // Open on the round that matters (first one with a match to play), and
+        // never stay on a round this tournament doesn't have.
+        if (matches.isNotEmpty &&
+            (!_initializedRound || !matches.any((m) => m.roundNumber == _selectedRound))) {
+          _selectedRound = defaultRound(matches);
           _initializedRound = true;
         }
 

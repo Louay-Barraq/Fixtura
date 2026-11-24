@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:gap/gap.dart';
@@ -32,6 +34,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
   late int _homeScore;
   late int _awayScore;
   int? _penaltyWinnerId;
+  // Set when SAVE is tapped on a knockout draw with no penalty winner picked.
+  // Shown inside the sheet: a snackbar would sit behind it, out of sight.
+  bool _showPenaltyError = false;
+  int _penaltyShakes = 0;
 
   @override
   void initState() {
@@ -41,9 +47,16 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
   }
 
   // Asks before a save would wipe a later match's result. True means go ahead.
-  Future<bool> _confirmLaterResultCleared(int? homeScore, int? awayScore) async {
+  Future<bool> _confirmLaterResultCleared(
+    int? homeScore,
+    int? awayScore,
+  ) async {
     final provider = Provider.of<TournamentProvider>(context, listen: false);
-    final clearedMatch = provider.laterMatchClearedBy(widget.match, homeScore, awayScore);
+    final clearedMatch = provider.laterMatchClearedBy(
+      widget.match,
+      homeScore,
+      awayScore,
+    );
     if (clearedMatch == null) return true;
 
     final l10n = AppLocalizations.of(context)!;
@@ -64,7 +77,12 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
           (widget.match.groupIndex != null
               ? l10n.laterResultWarningGroupBody
               : l10n.laterResultWarningBody)(
-            localizedRoundName(l10n, clearedMatch, TournamentType.knockout, provider.activeMatches),
+            localizedRoundName(
+              l10n,
+              clearedMatch,
+              TournamentType.knockout,
+              provider.activeMatches,
+            ),
           ),
           style: const TextStyle(
             fontFamily: 'RobotoMono',
@@ -102,14 +120,13 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
   }
 
   Future<void> _saveScore() async {
-    if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
+    if (widget.tournamentType == TournamentType.knockout &&
+        _homeScore == _awayScore) {
       if (_penaltyWinnerId == null) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(AppLocalizations.of(context)!.knockoutDrawNotAllowed),
-            backgroundColor: const Color(0xFFD71212),
-          ),
-        );
+        setState(() {
+          _showPenaltyError = true;
+          _penaltyShakes++;
+        });
         return;
       }
     }
@@ -117,7 +134,8 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
     int finalHScore = _homeScore;
     int finalAScore = _awayScore;
 
-    if (widget.tournamentType == TournamentType.knockout && _homeScore == _awayScore) {
+    if (widget.tournamentType == TournamentType.knockout &&
+        _homeScore == _awayScore) {
       if (_penaltyWinnerId == widget.homeTeam?.id) {
         finalHScore += 1;
       } else {
@@ -125,7 +143,8 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
       }
     }
 
-    if (!await _confirmLaterResultCleared(finalHScore, finalAScore) || !mounted) return;
+    if (!await _confirmLaterResultCleared(finalHScore, finalAScore) || !mounted)
+      return;
 
     final provider = Provider.of<TournamentProvider>(context, listen: false);
     provider.updateMatchScore(widget.match.id!, finalHScore, finalAScore);
@@ -155,7 +174,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
         left: 20,
         right: 20,
         top: 16,
-        bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom + 20,
+        bottom:
+            MediaQuery.of(context).viewInsets.bottom +
+            MediaQuery.of(context).padding.bottom +
+            20,
       ),
       decoration: const BoxDecoration(
         color: Color(0xFFFFFCFC),
@@ -185,7 +207,12 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
             // Header Title
             Center(
               child: ShortSectionHeader(
-                title: localizedRoundName(l10n, widget.match, widget.tournamentType, provider.activeMatches).toUpperCase(),
+                title: localizedRoundName(
+                  l10n,
+                  widget.match,
+                  widget.tournamentType,
+                  provider.activeMatches,
+                ).toUpperCase(),
               ),
             ),
             const Gap(24),
@@ -215,11 +242,17 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                       score: _homeScore,
                       onDecrement: () {
                         if (_homeScore > 0) {
-                          setState(() => _homeScore--);
+                          setState(() {
+                            _homeScore--;
+                            _showPenaltyError = false;
+                          });
                         }
                       },
                       onIncrement: () {
-                        setState(() => _homeScore++);
+                        setState(() {
+                          _homeScore++;
+                          _showPenaltyError = false;
+                        });
                       },
                     ),
                   ),
@@ -245,11 +278,17 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                       score: _awayScore,
                       onDecrement: () {
                         if (_awayScore > 0) {
-                          setState(() => _awayScore--);
+                          setState(() {
+                            _awayScore--;
+                            _showPenaltyError = false;
+                          });
                         }
                       },
                       onIncrement: () {
-                        setState(() => _awayScore++);
+                        setState(() {
+                          _awayScore++;
+                          _showPenaltyError = false;
+                        });
                       },
                     ),
                   ),
@@ -260,57 +299,111 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
 
             // Tie breaker option for Knockout matches when scores are tied
             if (isKnockout && isTie) ...[
-              Container(
-                padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: Colors.white,
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(color: const Color(0xFFD71212), width: 1.5),
-                  boxShadow: [
-                    BoxShadow(
-                      offset: const Offset(0, 2),
-                      blurRadius: 4,
-                      spreadRadius: 0,
-                      color: Colors.black.withValues(alpha: 0.15),
-                    ),
-                  ],
+              TweenAnimationBuilder<double>(
+                key: ValueKey(_penaltyShakes),
+                tween: Tween(begin: _penaltyShakes == 0 ? 1 : 0, end: 1),
+                duration: const Duration(milliseconds: 450),
+                builder: (context, t, child) => Transform.translate(
+                  // Short side-to-side shake that settles, to point at the box
+                  offset: Offset(math.sin(t * math.pi * 6) * 8 * (1 - t), 0),
+                  child: child,
                 ),
-                child: Column(
-                  children: [
-                    Text(
-                      l10n.penaltyShootoutWinner,
-                      style: const TextStyle(
-                        fontFamily: 'BebasNeue',
-                        fontSize: 16,
-                        color: Color(0xFFD71212),
-                        letterSpacing: 1,
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 200),
+                  padding: const EdgeInsets.all(14),
+                  decoration: BoxDecoration(
+                    color: _showPenaltyError
+                        ? const Color(0xFFFFF1F1)
+                        : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(
+                      color: const Color(0xFFD71212),
+                      width: _showPenaltyError ? 2.5 : 1.5,
+                    ),
+                    boxShadow: [
+                      BoxShadow(
+                        offset: const Offset(0, 2),
+                        blurRadius: 4,
+                        spreadRadius: 0,
+                        color: Colors.black.withValues(alpha: 0.15),
                       ),
-                    ),
-                    const Gap(10),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: _buildPenaltyOption(
-                            name: homeName,
-                            isSelected: _penaltyWinnerId == widget.homeTeam?.id,
-                            onTap: () {
-                              setState(() => _penaltyWinnerId = widget.homeTeam?.id);
-                            },
-                          ),
+                    ],
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        l10n.penaltyShootoutWinner,
+                        style: const TextStyle(
+                          fontFamily: 'BebasNeue',
+                          fontSize: 16,
+                          color: Color(0xFFD71212),
+                          letterSpacing: 1,
                         ),
-                        const Gap(10),
-                        Expanded(
-                          child: _buildPenaltyOption(
-                            name: awayName,
-                            isSelected: _penaltyWinnerId == widget.awayTeam?.id,
-                            onTap: () {
-                              setState(() => _penaltyWinnerId = widget.awayTeam?.id);
-                            },
+                      ),
+                      const Gap(10),
+                      Row(
+                        children: [
+                          Expanded(
+                            child: _buildPenaltyOption(
+                              name: homeName,
+                              isSelected:
+                                  _penaltyWinnerId == widget.homeTeam?.id,
+                              onTap: () {
+                                setState(() {
+                                  _penaltyWinnerId = widget.homeTeam?.id;
+                                  _showPenaltyError = false;
+                                });
+                              },
+                            ),
                           ),
-                        ),
-                      ],
-                    ),
-                  ],
+                          const Gap(10),
+                          Expanded(
+                            child: _buildPenaltyOption(
+                              name: awayName,
+                              isSelected:
+                                  _penaltyWinnerId == widget.awayTeam?.id,
+                              onTap: () {
+                                setState(() {
+                                  _penaltyWinnerId = widget.awayTeam?.id;
+                                  _showPenaltyError = false;
+                                });
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                      AnimatedSize(
+                        duration: const Duration(milliseconds: 200),
+                        child: !_showPenaltyError
+                            ? const SizedBox(width: double.infinity)
+                            : Padding(
+                                padding: const EdgeInsets.only(top: 12),
+                                child: Row(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    const Icon(
+                                      Icons.error_outline_rounded,
+                                      size: 16,
+                                      color: Color(0xFFD71212),
+                                    ),
+                                    const Gap(8),
+                                    Expanded(
+                                      child: Text(
+                                        l10n.knockoutDrawNotAllowed,
+                                        style: const TextStyle(
+                                          fontFamily: 'RobotoMono',
+                                          fontSize: 11,
+                                          height: 1.4,
+                                          color: Color(0xFFD71212),
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
               const Gap(20),
@@ -328,7 +421,10 @@ class _ScoreEntryDialogState extends State<ScoreEntryDialog> {
                         decoration: BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.circular(6),
-                          border: Border.all(color: const Color(0xFFD71212), width: 1.5),
+                          border: Border.all(
+                            color: const Color(0xFFD71212),
+                            width: 1.5,
+                          ),
                           boxShadow: [
                             BoxShadow(
                               offset: const Offset(0, 2),

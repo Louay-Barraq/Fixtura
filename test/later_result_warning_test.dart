@@ -62,9 +62,9 @@ void main() {
   });
 
   group('score dialog', () {
-    Future<void> openDialog(WidgetTester tester) async {
+    Future<void> openDialog(WidgetTester tester, {int round = 1, int pos = 0}) async {
       final teams = provider.activeTeams;
-      final m = match(1, 0);
+      final m = match(round, pos);
       await tester.pumpWidget(ChangeNotifierProvider.value(
         value: provider,
         child: MaterialApp(
@@ -114,6 +114,26 @@ void main() {
 
       expect(match(1, 0).isPlayed, isFalse);
       expect(match(2, 0).isPlayed, isFalse);
+    });
+
+    testWidgets('saving a knockout draw without a penalty winner explains why inside the sheet', (tester) async {
+      await tester.runAsync(playedBracket);
+      await openDialog(tester, round: 2, pos: 1); // second semi: both players known, no result
+
+      const warning = "A draw isn't allowed in a knockout match. Pick the penalty shootout winner.";
+      expect(find.text(warning), findsNothing);
+
+      await tester.tap(find.text('SAVE RESULT'));
+      await tester.pumpAndSettle();
+      expect(find.text(warning), findsOneWidget);
+      expect(match(2, 1).isPlayed, isFalse);
+
+      // Picking a winner clears the warning
+      final finalMatch = match(2, 1);
+      final homeName = provider.activeTeams.firstWhere((t) => t.id == finalMatch.homeTeamId).name;
+      await tester.tap(find.text(homeName).last);
+      await tester.pumpAndSettle();
+      expect(find.text(warning), findsNothing);
     });
   });
 }
