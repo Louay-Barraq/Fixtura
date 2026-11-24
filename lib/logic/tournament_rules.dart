@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import '../models/match.dart';
 import '../models/standing.dart';
 import '../models/team.dart';
@@ -134,6 +136,23 @@ List<int?> knockoutSlots(Tournament tournament, List<Team> teams, List<MatchMode
     secondHalf.addAll([at(g + 1, 0), at(g, 1)]);
   }
   return [...firstHalf, ...secondHalf];
+}
+
+/// The round the fixtures tab opens on: the first one with a match still to
+/// play, else the last round that has results (a finished tournament opens on
+/// its final round), else the first round.
+int defaultRound(List<MatchModel> matches) {
+  if (matches.isEmpty) return 1;
+  final rounds = matches.map((m) => m.roundNumber).toSet().toList()..sort();
+  for (final r in rounds) {
+    if (matches.any((m) =>
+        m.roundNumber == r && !m.isPlayed && m.homeTeamId != null && m.awayTeamId != null)) {
+      return r;
+    }
+  }
+  final played = matches.where((m) => m.isPlayed && m.homeTeamId != null && m.awayTeamId != null);
+  if (played.isNotEmpty) return played.map((m) => m.roundNumber).reduce(max);
+  return rounds.first;
 }
 
 /// Winner of a played knockout match, or null if it has no winner yet.

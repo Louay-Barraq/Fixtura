@@ -101,11 +101,17 @@ class TournamentProvider extends ChangeNotifier {
     _isLoading = true;
     notifyListeners();
     try {
-      _activeTournament = await _dbHelper.getTournament(id);
-      if (_activeTournament != null) {
-        _activeTeams = await _dbHelper.getTeamsForTournament(id);
-        _activeMatches = await _dbHelper.getMatchesForTournament(id);
-        _activeRouletteAssignments = await _loadRouletteAssignments(id);
+      // Read everything first and swap it in together, so a rebuild during
+      // the load never mixes this tournament with the previous one's matches.
+      final tournament = await _dbHelper.getTournament(id);
+      if (tournament != null) {
+        final teams = await _dbHelper.getTeamsForTournament(id);
+        final matches = await _dbHelper.getMatchesForTournament(id);
+        final roulette = await _loadRouletteAssignments(id);
+        _activeTournament = tournament;
+        _activeTeams = teams;
+        _activeMatches = matches;
+        _activeRouletteAssignments = roulette;
 
         final computedStatus = calculateTournamentStatus(
           _activeTournament!.type,
@@ -120,6 +126,9 @@ class TournamentProvider extends ChangeNotifier {
           }
         }
       } else {
+        _activeTournament = null;
+        _activeTeams = [];
+        _activeMatches = [];
         _activeRouletteAssignments = {};
       }
     } catch (e) {
